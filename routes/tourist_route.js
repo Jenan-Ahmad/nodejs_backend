@@ -8,8 +8,8 @@ touristRouter.post('/signup', TouristController.register);
 
 touristRouter.post('/login', TouristController.login);
 
-touristRouter.get('/', ()=>{
-    res.json({ status: true, success: "connected npw" });
-})
+touristRouter.get('/', (req, res) => {
+    res.json({ status: true, success: "connected now" });
+});
 
 module.exports = touristRouter;
