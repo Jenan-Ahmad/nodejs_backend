@@ -8,4 +8,8 @@ touristRouter.post('/signup', TouristController.register);
 
 touristRouter.post('/login', TouristController.login);
 
+touristRouter.get('/', ()=>{
+    res.json({ status: true, success: "connected npw" });
+})
+
 module.exports = touristRouter;
