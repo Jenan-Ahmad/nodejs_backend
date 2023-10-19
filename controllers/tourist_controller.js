@@ -26,6 +26,6 @@ exports.register = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
-
+  res.json({ status: true, success: "logged in" });
   console.log('connected in contorl');
 };
