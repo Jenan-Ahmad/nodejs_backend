@@ -8,7 +8,7 @@ touristRouter.post('/signup', TouristController.register);
 
 touristRouter.post('/login', TouristController.login);
 
-touristRouter.get('/', (req, res) => {
+touristRouter.get('/tmpo', (req, res) => {
     res.json({ status: true, success: "connected now" });
 });
 
