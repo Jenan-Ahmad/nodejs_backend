@@ -6,6 +6,9 @@ const TouristRoute = require('./routes/tourist_route');
 app.use(express.json()); // JSON request body parsing
 
 // Route definitions
+
 app.use("/", TouristRoute); // Example route
+
+  
 
 module.exports = app;
