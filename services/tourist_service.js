@@ -11,29 +11,27 @@ const transporter = nodemailer.createTransport({
 });
 
 class TouristService {
-  static async registerTourist(token, first_name, last_name, email, password) {
+  static async registerTourist(token, firstName, lastName, email, password) {
     try {
+
       console.log(
-        "-----first_nam-----last_name-----Email --- Password-----",
-        first_name,
-        last_name,
+        "-----firstName-----lastName-----Email --- Password-----",
+        firstName,
+        lastName,
         email,
         password
       );
+
       jwt.verify(token, "secret", async function (err, decoded) {
         if (err) {
           console.log(err);
-          // return res.send("Email verification failed, possibly the link is invalid or expired");
+          throw new Error('Email verification failed, possibly the link is invalid or expired')
         }
         else {
-          const createTourist = new TouristModel({ first_name, last_name, email, password });
+          const createTourist = new TouristModel({ firstName, lastName, email, password });
           await createTourist.save();
-          // res.json({ message: 'Verification email sent. Please check your inbox.' });
-
         }
       });
-
-
     } catch (err) {
       throw err;
     }
@@ -51,19 +49,18 @@ class TouristService {
         to: email,
         subject: 'Email Verification',
         text: `Please click the following link to verify your email: ${verificationLink}`,
- 
+
       };
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.error(error);
-          // res.status(500).json({ message: 'Email not sent' });
+          throw new Error('An error occurred sending the verification line')
         }
         console.log(`Email sent: ${info.response}`);
-        // res.json({ message: 'Email sent' });
       });
 
     } catch (err) {
-      throw err;
+      throw new Error('The verification process failed');
     }
   }
 
@@ -73,6 +70,7 @@ class TouristService {
       return await TouristModel.findOne({ email });
     } catch (err) {
       console.log(err);
+      throw new Error('An error occurred while retrieving the tourist by email.');
     }
   }
 }
