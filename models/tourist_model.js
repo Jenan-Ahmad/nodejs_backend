@@ -3,12 +3,12 @@ const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 
 const touristSchema = new mongoose.Schema({
-  first_name: {
+  firstName: {
     required: [true, "FName is required"],
     type: String,
     trim: true,
   },
-  last_name: {
+  lastName: {
     required: [true, "LName is required"],
     type: String,
     trim: true,
