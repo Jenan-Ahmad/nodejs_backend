@@ -8,11 +8,15 @@ exports.signup = async (req, res, next) => {
 
     const { firstName, lastName, email, password } = req.body;
 
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(409).json("All mandatory fields must be filled");
+    }
+
     userData.set("firstName", firstName);
     userData.set("lastName", lastName);
     userData.set("email", email);
     userData.set("password", password);
-
+    
     const duplicate = await TouristService.getTouristByEmail(email);
 
     if (duplicate) {
@@ -35,6 +39,9 @@ exports.register = async (req, res, next) => {
     const lastName = userData.get("lastName");
     const email = userData.get("email");
     const password = userData.get("password");
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(409).json("All mandatory fields must be filled");
+    }
     const duplicate = await TouristService.getTouristByEmail(email);
     if (duplicate) {
       return res.status(409).json({ message: 'User with this email already exists' });
