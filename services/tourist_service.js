@@ -25,7 +25,7 @@ class TouristService {
       jwt.verify(token, "secret", async function (err, decoded) {
         if (err) {
           console.log(err);
-          throw new Error('Email verification failed, possibly the link is invalid or expired')
+          throw new Error('Email verification failed, possibly the link is invalid or expired');
         }
         else {
           const createTourist = new TouristModel({ firstName, lastName, email, password });

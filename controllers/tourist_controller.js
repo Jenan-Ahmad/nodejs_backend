@@ -35,6 +35,10 @@ exports.register = async (req, res, next) => {
     const lastName = userData.get("lastName");
     const email = userData.get("email");
     const password = userData.get("password");
+    const duplicate = await TouristService.getTouristByEmail(email);
+    if (duplicate) {
+      return res.status(409).json({ message: 'User with this email already exists' });
+    }
     const response = await TouristService.registerTourist(token, firstName, lastName, email, password);
     res.status(200).json({ message: 'User registered' });
   }
