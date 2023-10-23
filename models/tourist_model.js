@@ -35,7 +35,7 @@ const touristSchema = new mongoose.Schema({
 touristSchema.pre("save", async function (next) {
   const tourist = this;
   if (!this.firstName || !this.lastName || !this.email || !this.password) {
-    throw new Error("All mandatory fields must be filled");
+    return next(new Error("All mandatory fields must be filled"));
   }
   if (!tourist.isModified("password")) {
     return next();
