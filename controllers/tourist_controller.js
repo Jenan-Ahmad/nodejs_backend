@@ -63,7 +63,7 @@ exports.login = async (req, res, next) => {
     if (!email || !password) {
       throw new Error('Parameter are not correct');
     }
-    let tourist = await TouristService.getTouristByEmail(email);
+    const tourist = await TouristService.getTouristByEmail(email);
     if (!tourist) {
       throw new Error('User does not exist');
     }
