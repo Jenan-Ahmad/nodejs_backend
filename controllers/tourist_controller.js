@@ -74,11 +74,7 @@ exports.login = async (req, res, next) => {
       throw new Error(`Username or Password does not match`);
     }
 
-    const updatedUser = await TouristService.TouristModel.findOneAndUpdate(
-      { email: email },
-      { remember_me: remember_me },
-      { new: true }
-    );
+    const updatedUser = await TouristService.updateRememberMe(email, remember_me);
 
     if (!updatedUser) {
       throw new Error('User does not exist');

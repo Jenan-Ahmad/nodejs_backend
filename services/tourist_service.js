@@ -84,6 +84,14 @@ class TouristService {
     }
   }
 
+  static async updateRememberMe(email, remember_me) {
+    try {
+      return TouristModel.updateOne({ email: email }, { $set: { remember_me: remember_me } });
+    } catch (error) {
+      throw new Error("An error occurred updating the remember_me value");
+    }
+  }
+
   static async generateAccessToken(tokenData, JWTSecret_Key, JWT_EXPIRE) {
     return jwt.sign(tokenData, JWTSecret_Key, { expiresIn: JWT_EXPIRE });
   }
