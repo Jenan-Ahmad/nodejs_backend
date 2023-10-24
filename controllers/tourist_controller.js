@@ -82,7 +82,7 @@ exports.login = async (req, res, next) => {
 
     // Creating Token
 
-    const tokenData = { email: user.email };
+    const tokenData = { email: tourist.email };
 
 
     const token = await TouristService.generateAccessToken(tokenData, "secret", "1h")
