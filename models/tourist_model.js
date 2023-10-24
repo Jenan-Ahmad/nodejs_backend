@@ -29,6 +29,9 @@ const touristSchema = new mongoose.Schema({
     type: String,
     required: [true, "Password is required"],
   },
+  remember_me: {
+    type: String,
+  },
 });
 
 // Middleware to hash the password before saving it
@@ -49,6 +52,17 @@ touristSchema.pre("save", async function (next) {
     return next(err);
   }
 });
+
+touristSchema.methods.comparePassword = async function (candidatePassword) {
+  try {
+    console.log('----------------no password', this.password);
+    // @ts-ignore
+    const isMatch = await bcrypt.compare(candidatePassword, this.password);
+    return isMatch;
+  } catch (error) {
+    throw error;
+  }
+};
 
 const TouristModel = db.model("tourists", touristSchema);
 module.exports = TouristModel;

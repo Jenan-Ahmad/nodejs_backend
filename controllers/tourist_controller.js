@@ -8,7 +8,7 @@ exports.signup = async (req, res, next) => {
 
     const { firstName, lastName, email, password } = req.body;
 
-    if (!firstName || !lastName || !email || !password) {
+    if (emptyFields(firstName, lastName, email, password)) {
       return res.status(409).json("All mandatory fields must be filled");
     }
 
@@ -16,7 +16,7 @@ exports.signup = async (req, res, next) => {
     userData.set("lastName", lastName);
     userData.set("email", email);
     userData.set("password", password);
-    
+
     const duplicate = await TouristService.getTouristByEmail(email);
 
     if (duplicate) {
@@ -39,7 +39,7 @@ exports.register = async (req, res, next) => {
     const lastName = userData.get("lastName");
     const email = userData.get("email");
     const password = userData.get("password");
-    if (!firstName || !lastName || !email || !password) {
+    if (emptyFields(firstName, lastName, email, password)) {
       return res.status(409).json("All mandatory fields must be filled");
     }
     const duplicate = await TouristService.getTouristByEmail(email);
@@ -55,6 +55,45 @@ exports.register = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
-  res.json({ status: true, success: "logged in" });
-  console.log('connected in contorl');
+
+  try {
+
+    const { email, password, remember_me } = req.body;
+
+    if (!email || !password) {
+      throw new Error('Parameter are not correct');
+    }
+    let tourist = await TouristService.getTouristByEmail(email);
+    if (!tourist) {
+      throw new Error('User does not exist');
+    }
+
+    const isPasswordCorrect = await tourist.comparePassword(password);
+
+    if (isPasswordCorrect === false) {
+      throw new Error(`Username or Password does not match`);
+    }
+
+    const updatedUser = await TouristModel.findOneAndUpdate(
+      { email: email },
+      { remember_me: remember_me },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      throw new Error('User does not exist');
+    }
+
+    // Creating Token
+
+    const tokenData = { email: user.email };
+
+
+    const token = await TouristService.generateAccessToken(tokenData, "secret", "1h")
+
+    res.status(200).json({ status: true, success: "sendData", token: token });
+  } catch (error) {
+    console.log(error, 'err---->');
+    res.status(500).json({ error: err.message });
+  }
 };
