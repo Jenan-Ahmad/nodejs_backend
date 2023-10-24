@@ -94,6 +94,6 @@ exports.login = async (req, res, next) => {
     res.status(200).json({ status: true, success: "sendData", token: token });
   } catch (error) {
     console.log(error, 'err---->');
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: error.message });
   }
 };
