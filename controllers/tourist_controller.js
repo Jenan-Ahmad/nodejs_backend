@@ -90,7 +90,7 @@ exports.resetPassword = async (req, res, next) => {
   console.log("------------------Reset Password------------------");
   console.log("---req body---", req.body);
   try {
-    const {email} = req.body;
+    const { email } = req.body;
     if (!email) {
       throw new Error('no email address was received');
     }
@@ -100,7 +100,7 @@ exports.resetPassword = async (req, res, next) => {
       throw new Error('User does not exist');
     }
     const password = await TouristService.generatePassword();
-    
+
 
     TouristService.resetPassword(email, password);
     const updatedUser = await TouristService.updatePassword(email, password);

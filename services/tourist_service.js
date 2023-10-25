@@ -67,8 +67,8 @@ class TouristService {
     }
   }
 
-  static async resetPassword (email, password){
-    try{
+  static async resetPassword(email, password) {
+    try {
       const mailOptions = {
         from: 'touristineapp@gmail.com', // Replace with your email
         to: email,
@@ -84,7 +84,7 @@ class TouristService {
         console.log(`Email sent: ${info.response}`);
       });
 
-    }catch(error){
+    } catch (error) {
       throw new Error('Reset Password Process Failed');
     }
   }
@@ -115,18 +115,19 @@ class TouristService {
     }
   }
 
-  static async updatePassword (email, password){
+  static async updatePassword(email, password) {
     try {
-      password = TouristModel.encryptPassword(password);
+      const tourist = new TouristModel();
+      password = tourist.encryptPassword(password);
       return TouristModel.updateOne({ email: email }, { $set: { password: password } });
     } catch (error) {
-      throw new Error("An error occurred updating the remember_me value");
+      throw new Error("An error occurred updating the password value");
     }
   }
 
-  static async generatePassword () {
+  static async generatePassword() {
     try {
-  
+
       const password = generator.generate({
         length: 10,
         numbers: true
