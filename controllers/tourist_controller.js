@@ -8,7 +8,7 @@ exports.signup = async (req, res, next) => {
 
     const { firstName, lastName, email, password } = req.body;
 
-    if (TouristService.emptyFields(firstName, lastName, email, password)) {
+    if (!firstName || !lastName || !email || !password) {
       return res.status(409).json("All mandatory fields must be filled");
     }
 
@@ -39,7 +39,7 @@ exports.register = async (req, res, next) => {
     const lastName = userData.get("lastName");
     const email = userData.get("email");
     const password = userData.get("password");
-    if (TouristService.emptyFields(firstName, lastName, email, password)) {
+    if (!firstName || !lastName || !email || !password) {
       return res.status(409).json("All mandatory fields must be filled");
     }
     const duplicate = await TouristService.getTouristByEmail(email);
