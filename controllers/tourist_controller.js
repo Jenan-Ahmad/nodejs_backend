@@ -99,7 +99,7 @@ exports.resetPassword = async (req, res, next) => {
     if (!tourist) {
       throw new Error('User does not exist');
     }
-    const password = await tourist.generatePassword();
+    const password = await TouristService.generatePassword();
     
 
     TouristService.resetPassword(email, password);
