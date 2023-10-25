@@ -101,13 +101,12 @@ exports.resetPassword = async (req, res, next) => {
     }
     const password = await tourist.generatePassword();
     
-    if (!updatedUser) {
-      throw new Error('User does not exist');
-    }
 
     TouristService.resetPassword(email, password);
     const updatedUser = await TouristService.updatePassword(email, password);
-
+    if (!updatedUser) {
+      throw new Error('User does not exist');
+    }
     //send email with the new password
     res.status(200).json({ message: 'Check your email for the new password' });
 
