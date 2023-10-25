@@ -1,6 +1,7 @@
 const TouristModel = require("../models/tourist_model");
 const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
+const generator = require("generate-password");
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -116,11 +117,25 @@ class TouristService {
 
   static async updatePassword (email, password){
     try {
+      password = TouristModel.encryptPassword(password);
       return TouristModel.updateOne({ email: email }, { $set: { password: password } });
     } catch (error) {
       throw new Error("An error occurred updating the remember_me value");
     }
   }
+
+  static async generatePassword () {
+    try {
+  
+      const password = generator.generate({
+        length: 10,
+        numbers: true
+      });
+      return password;
+    } catch (error) {
+      return next(err);
+    }
+  };
 
   static async generateAccessToken(tokenData, JWTSecret_Key, JWT_EXPIRE) {
     return jwt.sign(tokenData, JWTSecret_Key, { expiresIn: JWT_EXPIRE });
