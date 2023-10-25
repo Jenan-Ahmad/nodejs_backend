@@ -90,7 +90,7 @@ exports.resetPassword = async (req, res, next) => {
   console.log("------------------Reset Password------------------");
   console.log("---req body---", req.body);
   try {
-    const email = req.body;
+    const {email} = req.body.email;
     if (!email) {
       throw new Error('no email address was received');
     }
