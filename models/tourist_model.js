@@ -57,8 +57,6 @@ touristSchema.pre("save", async function (next) {
 touristSchema.methods.generatePassword = async function () {
   try {
 
-    const generator = require('generate-password');
-
     const password = generator.generate({
       length: 10,
       numbers: true
