@@ -60,7 +60,7 @@ touristSchema.methods.encryptPassword = async function (password) {
     const hash = await bcrypt.hash(password, salt);
     return hash;
   } catch (error) {
-    return next(err);
+    throw error;
   }
 };
 
