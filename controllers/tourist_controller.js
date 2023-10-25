@@ -95,7 +95,7 @@ exports.resetPassword = async (req, res, next) => {
       throw new Error('no email address was received');
     }
     const tourist = TouristService.getTouristByEmail(email);
-    const oldPassword = tourist.password;
+    // const oldPassword = tourist.password;
     if (!tourist) {
       throw new Error('User does not exist');
     }

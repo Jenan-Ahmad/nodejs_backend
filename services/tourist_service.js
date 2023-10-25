@@ -117,8 +117,8 @@ class TouristService {
 
   static async updatePassword(email, password) {
     try {
-      const tourist = new TouristModel();
-      password = tourist.encryptPassword(password);
+      // const tourist = new TouristModel();
+      // password = tourist.encryptPassword(password);
       return TouristModel.updateOne({ email: email }, { $set: { password: password } });
     } catch (error) {
       throw new Error("An error occurred updating the password value");
