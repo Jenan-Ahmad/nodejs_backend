@@ -99,7 +99,7 @@ class TouristService {
   }
 
   static async emptyFields(firstName, lastName, email, password) {
-    if (!this.firstName || !this.lastName || !this.email || !this.password) {
+    if (!firstName || !lastName || !email || !password) {
       return true;
     } else {
       return false;
