@@ -1,6 +1,6 @@
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
-const gen_pass = require("generate-password");
+const generator = require("generate-password");
 const mongoose = require("mongoose");
 
 const touristSchema = new mongoose.Schema({
