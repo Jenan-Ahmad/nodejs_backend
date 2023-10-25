@@ -1,5 +1,6 @@
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
+const gen_pass = require("generate-password");
 const mongoose = require("mongoose");
 
 const touristSchema = new mongoose.Schema({
@@ -52,6 +53,23 @@ touristSchema.pre("save", async function (next) {
     return next(err);
   }
 });
+
+touristSchema.methods.generatePassword = async function () {
+  try {
+
+    const generator = require('generate-password');
+
+    const password = generator.generate({
+      length: 10,
+      numbers: true
+    });
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+    return hash;
+  } catch (error) {
+    return next(err);
+  }
+};
 
 touristSchema.methods.comparePassword = async function (candidatePassword) {
   try {

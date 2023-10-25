@@ -66,6 +66,28 @@ class TouristService {
     }
   }
 
+  static async resetPassword (email, password){
+    try{
+      const mailOptions = {
+        from: 'touristineapp@gmail.com', // Replace with your email
+        to: email,
+        subject: 'Reset Password',
+        text: `Here is your new password: ${password}`,
+
+      };
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error(error);
+          throw new Error('An error occurred sending the new password')
+        }
+        console.log(`Email sent: ${info.response}`);
+      });
+
+    }catch(error){
+      throw new Error('Reset Password Process Failed');
+    }
+  }
+
 
   static async getTouristByEmail(email) {
     try {
@@ -87,6 +109,14 @@ class TouristService {
   static async updateRememberMe(email, remember_me) {
     try {
       return TouristModel.updateOne({ email: email }, { $set: { remember_me: remember_me } });
+    } catch (error) {
+      throw new Error("An error occurred updating the remember_me value");
+    }
+  }
+
+  static async updatePassword (email, password){
+    try {
+      return TouristModel.updateOne({ email: email }, { $set: { password: password } });
     } catch (error) {
       throw new Error("An error occurred updating the remember_me value");
     }
