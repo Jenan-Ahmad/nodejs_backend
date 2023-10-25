@@ -8,7 +8,7 @@ exports.signup = async (req, res, next) => {
 
     const { firstName, lastName, email, password } = req.body;
 
-    if (!firstName || !lastName || !email || !password) {
+    if (TouristService.emptyFields(firstName, lastName, email, password)) {
       return res.status(409).json("All mandatory fields must be filled");
     }
 
@@ -39,7 +39,7 @@ exports.register = async (req, res, next) => {
     const lastName = userData.get("lastName");
     const email = userData.get("email");
     const password = userData.get("password");
-    if (!firstName || !lastName || !email || !password) {
+    if (TouristService.emptyFields(firstName, lastName, email, password)) {
       return res.status(409).json("All mandatory fields must be filled");
     }
     const duplicate = await TouristService.getTouristByEmail(email);
@@ -91,27 +91,33 @@ exports.resetPassword = async (req, res, next) => {
   console.log("---req body---", req.body);
   try {
     const {email} = req.body;
+    console.log("email: ", email);
     if (!email) {
       throw new Error('no email address was received');
     }
+    console.log("1here\n");
     const tourist = TouristService.getTouristByEmail(email);
+    console.log("1here\n");
     const oldPassword = tourist.password;
+    console.log("1here\n");
     if (!tourist) {
       throw new Error('User does not exist');
     }
+    console.log("1here\n");
     const password = await tourist.generatePassword();
-    const updatedUser = await TouristService.updatePassword(email, password);
+    console.log("1here\n");
     if (!updatedUser) {
       throw new Error('User does not exist');
     }
-
+console.log("1here\n");
     TouristService.resetPassword(email, password);
+    const updatedUser = await TouristService.updatePassword(email, password);
 
     //send email with the new password
     res.status(200).json({ message: 'Check your email for the new password' });
 
   } catch (error) {
-    const updatedUser = await TouristService.updatePassword(email, oldPassword);
+    // const updatedUser = await TouristService.updatePassword(email, oldPassword);
     console.log(error, 'err---->');
     res.status(500).json({ error: error.message });
   }
