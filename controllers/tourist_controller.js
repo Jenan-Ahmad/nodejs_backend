@@ -7,23 +7,22 @@ exports.signup = async (req, res, next) => {
     console.log("---req body---", req.body);
 
     const { firstName, lastName, email, password } = req.body;
-console.log("------------------Sign Up1------------------");
-    if (TouristService.emptyFields(firstName, lastName, email, password)) {
+
+    if (!firstName || !lastName || !email || !password) {
       return res.status(409).json("All mandatory fields must be filled");
     }
-console.log("------------------Sign Up2------------------");
+
     userData.set("firstName", firstName);
     userData.set("lastName", lastName);
     userData.set("email", email);
     userData.set("password", password);
-console.log("------------------Sign Up3------------------");
+
     const duplicate = await TouristService.getTouristByEmail(email);
-console.log("------------------Sign Up4------------------");
+
     if (duplicate) {
       return res.status(409).json({ message: 'User with this email already exists' });
     } else {
       const emailverif = await TouristService.verifyEmail(email);
-      console.log("------------------Sign Up5------------------");
       return res.status(200).json({ message: "A verification email is sent to you" });
     }
 
@@ -40,7 +39,7 @@ exports.register = async (req, res, next) => {
     const lastName = userData.get("lastName");
     const email = userData.get("email");
     const password = userData.get("password");
-    if (TouristService.emptyFields(firstName, lastName, email, password)) {
+    if (!firstName || !lastName || !email || !password) {
       return res.status(409).json("All mandatory fields must be filled");
     }
     const duplicate = await TouristService.getTouristByEmail(email);
