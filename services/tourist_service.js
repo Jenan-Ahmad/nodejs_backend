@@ -136,7 +136,21 @@ class TouristService {
   static async generateAccessToken(tokenData, JWTSecret_Key, JWT_EXPIRE) {
     return jwt.sign(tokenData, JWTSecret_Key, { expiresIn: JWT_EXPIRE });
   }
-  
+
+  static async getInfoFromToken(token) {
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, 'secret', (err, decoded) => {
+        if (err) {
+          reject('Invalid token');
+        } else {
+          // You can access user data from the 'decoded' object
+          const { firstName, lastName, email, password } = decoded;
+          resolve({ firstName, lastName, email, password });
+        }
+      });
+    });
+  }
+
 }
 
 module.exports = TouristService;
