@@ -28,20 +28,30 @@ exports.signup = async (req, res, next) => {
 
 exports.register = async (req, res, next) => {
   try {
-    const { token } = req.query;
-    const firstName = token.firstName;
-    const lastName = token.lastName;
-    const email = token.email;
-    const password = token.password;
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(409).json("All mandatory fields must be filled");
-    }
-    const duplicate = await TouristService.getTouristByEmail(email);
-    if (duplicate) {
-      return res.status(409).json({ message: 'User with this email already exists' });
-    }
-    const response = await TouristService.registerTourist(token, firstName, lastName, email, password);
-    res.status(200).json({ message: 'User registered' });
+    // const { token } = req.query;
+    const token = req.query.token;
+    jwt.verify(token, 'secret', async (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ error: 'Invalid token' });
+      }
+
+      // You can access user data from the 'decoded' object
+      const { firstName, lastName, email, password } = decoded;
+
+      if (!firstName || !lastName || !email || !password) {
+        return res.status(409).json("All mandatory fields must be filled");
+      }
+
+      const duplicate = await TouristService.getTouristByEmail(email);
+
+      if (duplicate) {
+        return res.status(409).json({ message: 'User with this email already exists' });
+      }
+      
+      const response = await TouristService.registerTourist(token, firstName, lastName, email, password);
+      res.status(200).json({ message: 'User registered' });
+    });
+
   }
   catch (err) {
     res.status(500).json({ error: err.message });
