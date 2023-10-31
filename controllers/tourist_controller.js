@@ -85,7 +85,7 @@ exports.login = async (req, res, next) => {
       // Creating Token
       const tokenData = { firstName: tourist.firstName, lastName: tourist.lastName, email: tourist.email, password: password };
       const token = await TouristService.generateAccessToken(tokenData, "secret", "1h");
-      res.status(200).json({ status: true, success: "sendData", token: token, type: 100 });//type 1->tourist
+      res.status(200).json({ status: true, success: "sendData", token: token, type: 100 });//type 100->tourist
     }
 
   } catch (error) {
