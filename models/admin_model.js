@@ -65,7 +65,7 @@ adminSchema.methods.encryptPassword = async function (password) {
   
   adminSchema.methods.comparePassword = async function (candidatePassword) {
     try {
-      console.log('----------------no password', this.password);
+      console.log('----------------password', this.password);
       // @ts-ignore
       const isMatch = await bcrypt.compare(candidatePassword, this.password);
       return isMatch;
@@ -74,5 +74,5 @@ adminSchema.methods.encryptPassword = async function (password) {
     }
   };
   
-  const AdmintModel = db.model("Admins", admintSchema);
+  const AdmintModel = db.model("admins", admintSchema);
   module.exports = AdminModel;

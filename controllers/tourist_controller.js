@@ -17,7 +17,7 @@ exports.signup = async (req, res, next) => {
       return res.status(409).json({ message: 'User with this email already exists' });
     } else {
       const emailverif = await TouristService.verifyEmail(firstName, lastName, email, password);
-      return res.status(200).json({ message: "A verification email is sent to you" });
+      return res.status(200).json({ message: "A verification email is sent to you"});
     }
 
   } catch (err) {
@@ -28,27 +28,34 @@ exports.signup = async (req, res, next) => {
 
 exports.register = async (req, res, next) => {
   try {
-    // const { token } = req.query;
-    const token = req.query.token;
-    const userData = await TouristService.getInfoFromToken(token);
 
-    if (!userData.firstName || !userData.lastName || !userData.email || !userData.password) {
+    const token = req.query.token;
+    const touristData = await TouristService.getInfoFromToken(token);
+
+    if (!touristData.firstName || !touristData.lastName || !touristData.email || !touristData.password) {
       return res.status(409).json("All mandatory fields must be filled");
     }
 
-    const duplicate = await TouristService.getTouristByEmail(userData.email);
+    const duplicate = await TouristService.getTouristByEmail(touristData.email);
 
     if (duplicate) {
       return res.status(409).json({ message: 'User with this email already exists' });
     }
-    
-    const response = await TouristService.registerTourist(token, userData.firstName, userData.lastName, userData.email, userData.password);
+
+    const response = await TouristService.registerTourist(token, touristData.firstName, touristData.lastName, touristData.email, touristData.password);
     res.status(200).json({ message: 'User registered' });
 
   }
   catch (err) {
     res.status(500).json({ error: err.message });
   }
+};
+
+exports.isVerified = async (req, res, next) => {
+
+  //get token
+  //extract email and check if user registered 
+
 };
 
 exports.login = async (req, res, next) => {
@@ -62,21 +69,25 @@ exports.login = async (req, res, next) => {
     }
     const tourist = await TouristService.getTouristByEmail(email);
     if (!tourist) {
+      //will check if admin
+      //if not throw error
       throw new Error('User does not exist');
-    }
-    const isPasswordCorrect = await tourist.comparePassword(password);
-    if (isPasswordCorrect === false) {
-      throw new Error(`Username or Password does not match`);
-    }
-    const updatedUser = await TouristService.updateRememberMe(email, remember_me);
-    if (!updatedUser) {
-      throw new Error('User does not exist');
+    } else {//if tourist
+      const isPasswordCorrect = await tourist.comparePassword(password);
+      if (isPasswordCorrect == false) {
+        throw new Error(`Username or Password does not match`);
+      }
+      const updatedTourist = await TouristService.updateRememberMe(email, remember_me);
+      if (!updatedTourist) {
+        throw new Error('User does not exist');
+      }
+
+      // Creating Token
+      const tokenData = { firstName: tourist.firstName, lastName: tourist.lastName, email: tourist.email, password: password };
+      const token = await TouristService.generateAccessToken(tokenData, "secret", "1h");
+      res.status(200).json({ status: true, success: "sendData", token: token, type: 100 });//type 1->tourist
     }
 
-    // Creating Token
-    const tokenData = { email: tourist.email };
-    const token = await TouristService.generateAccessToken(tokenData, "secret", "1h")
-    res.status(200).json({ status: true, success: "sendData", token: token });
   } catch (error) {
     console.log(error, 'err---->');
     res.status(500).json({ error: error.message });

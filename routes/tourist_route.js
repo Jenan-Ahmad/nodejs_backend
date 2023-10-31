@@ -9,7 +9,7 @@ touristRouter.post('/signup', TouristController.signup);
 
 touristRouter.get('/verify', TouristController.register);
 
-// touristRouter.post('/check-verification-status', TouristController.isVerified);
+touristRouter.post('/check-verification-status', TouristController.isVerified);
 
 touristRouter.post('/login', TouristController.login);
 

@@ -81,7 +81,7 @@ touristSchema.methods.encryptPassword = async function (password) {
 
 touristSchema.methods.comparePassword = async function (candidatePassword) {
   try {
-    console.log('----------------no password', this.password);
+    console.log('----------------password', this.password);
     // @ts-ignore
     const isMatch = await bcrypt.compare(candidatePassword, this.password);
     return isMatch;
