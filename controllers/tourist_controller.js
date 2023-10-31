@@ -30,7 +30,7 @@ exports.register = async (req, res, next) => {
   try {
     // const { token } = req.query;
     const token = req.query.token;
-    const userData = await getInfoFromToken(token);
+    const userData = await TouristService.getInfoFromToken(token);
 
     if (!userData.firstName || !userData.lastName || !userData.email || !userData.password) {
       return res.status(409).json("All mandatory fields must be filled");
