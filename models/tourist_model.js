@@ -1,6 +1,5 @@
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
-
 const mongoose = require("mongoose");
 
 const touristSchema = new mongoose.Schema({
@@ -33,6 +32,22 @@ const touristSchema = new mongoose.Schema({
   remember_me: {
     type: String,
   },
+  marital_status: {
+    type: String,
+  },
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'], // Specify the data type as 'Point'
+    },
+    coordinates: {
+      type: [Number], // Array of two numbers: [longitude, latitude]
+    },
+  },
+  healthIssues: {
+    type: [String], // Array of strings for family member names
+  },
+  
 });
 
 // Middleware to hash the password before saving it

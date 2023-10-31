@@ -1,5 +1,4 @@
 const TouristService = require("../services/tourist_service");
-var userData = new Map();
 
 exports.signup = async (req, res, next) => {
   try {
@@ -12,17 +11,12 @@ exports.signup = async (req, res, next) => {
       return res.status(409).json("All mandatory fields must be filled");
     }
 
-    userData.set("firstName", firstName);
-    userData.set("lastName", lastName);
-    userData.set("email", email);
-    userData.set("password", password);
-
     const duplicate = await TouristService.getTouristByEmail(email);
 
     if (duplicate) {
       return res.status(409).json({ message: 'User with this email already exists' });
     } else {
-      const emailverif = await TouristService.verifyEmail(email);
+      const emailverif = await TouristService.verifyEmail(firstName, lastName, email, password);
       return res.status(200).json({ message: "A verification email is sent to you" });
     }
 
@@ -35,10 +29,10 @@ exports.signup = async (req, res, next) => {
 exports.register = async (req, res, next) => {
   try {
     const { token } = req.query;
-    const firstName = userData.get("firstName");
-    const lastName = userData.get("lastName");
-    const email = userData.get("email");
-    const password = userData.get("password");
+    const firstName = token.firstName;
+    const lastName = token.lastName;
+    const email = token.email;
+    const password = token.password;
     if (!firstName || !lastName || !email || !password) {
       return res.status(409).json("All mandatory fields must be filled");
     }
@@ -92,7 +86,7 @@ exports.resetPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
     if (!email) {
-      throw new Error('no email address was received');
+      throw new Error('No email address was received');
     }
     const tourist = TouristService.getTouristByEmail(email);
     // const oldPassword = tourist.password;

@@ -38,11 +38,14 @@ class TouristService {
     }
   }
 
-  static async verifyEmail(email) {
+  static async verifyEmail(firstName, lastName, email, password) {
     try {
-      const token = await this.generateAccessToken({ email: email }, "secret", "1h")
-
-      // const token = jwt.sign({ email: email }, "secret", { expiresIn: '1d' });
+      const token = await this.generateAccessToken({
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: password
+      }, "secret", "1h")
 
       const verificationLink = `https://touristine.onrender.com/verify?token=${token}`;
 
@@ -96,14 +99,6 @@ class TouristService {
     } catch (err) {
       console.log(err);
       throw new Error('An error occurred while retrieving the tourist by email.');
-    }
-  }
-
-  static async emptyFields(firstName, lastName, email, password) {
-    if (!firstName || !lastName || !email || !password) {
-      return true;
-    } else {
-      return false;
     }
   }
 
