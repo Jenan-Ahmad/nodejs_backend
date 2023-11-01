@@ -17,7 +17,7 @@ exports.signup = async (req, res, next) => {
       return res.status(409).json({ message: 'User with this email already exists' });
     } else {
       const emailverif = await TouristService.verifyEmail(firstName, lastName, email, password);
-      return res.status(200).json({ message: "A verification email is sent to you"});
+      return res.status(200).json({ message: "A verification email is sent to you", token: token});
     }
 
   } catch (err) {
