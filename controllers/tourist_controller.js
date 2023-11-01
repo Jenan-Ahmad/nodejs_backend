@@ -53,8 +53,16 @@ exports.register = async (req, res, next) => {
 
 exports.isVerified = async (req, res, next) => {
 
-  //get token
-  //extract email and check if user registered 
+  const {email} = req.body;
+  if(!email) {
+    throw new Error('No email was given');
+  }
+  const tourist = await TouristService.getTouristByEmail(email);
+  if(!tourist){
+    return res.status(204).json({message: "false"});
+  } else{
+    return res.status(200).json({message: "true"});
+  }
 
 };
 
@@ -102,7 +110,7 @@ exports.resetPassword = async (req, res, next) => {
     if (!email) {
       throw new Error('No email address was received');
     }
-    const tourist = TouristService.getTouristByEmail(email);
+    const tourist = await TouristService.getTouristByEmail(email);
     // const oldPassword = tourist.password;
     if (!tourist) {
       throw new Error('User does not exist');
