@@ -38,14 +38,8 @@ class TouristService {
     }
   }
 
-  static async verifyEmail(firstName, lastName, email, password) {
+  static async verifyEmail(token, firstName, lastName, email, password) {
     try {
-      const token = await this.generateAccessToken({
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        password: password
-      }, "secret", "1h")
 
       const verificationLink = `https://touristine.onrender.com/verify?token=${token}`;
 

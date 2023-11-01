@@ -16,8 +16,14 @@ exports.signup = async (req, res, next) => {
     if (duplicate) {
       return res.status(409).json({ message: 'User with this email already exists' });
     } else {
-      const emailverif = await TouristService.verifyEmail(firstName, lastName, email, password);
-      return res.status(200).json({ message: "A verification email is sent to you", token: token});
+      const token = await TouristService.generateAccessToken({
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: password
+      }, "secret", "1h")
+      const emailverif = await TouristService.verifyEmail(token, firstName, lastName, email, password);
+      return res.status(200).json({ message: "A verification email is sent to you", token: token });
     }
 
   } catch (err) {
@@ -53,15 +59,15 @@ exports.register = async (req, res, next) => {
 
 exports.isVerified = async (req, res, next) => {
 
-  const {email} = req.body;
-  if(!email) {
+  const { email } = req.body;
+  if (!email) {
     throw new Error('No email was given');
   }
   const tourist = await TouristService.getTouristByEmail(email);
-  if(!tourist){
-    return res.status(204).json({message: "false"});
-  } else{
-    return res.status(200).json({message: "true"});
+  if (!tourist) {
+    return res.status(204).json({ message: "false" });
+  } else {
+    return res.status(200).json({ message: "true" });
   }
 
 };
