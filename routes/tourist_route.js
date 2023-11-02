@@ -15,6 +15,8 @@ touristRouter.post('/login', TouristController.login);
 
 touristRouter.post('/send-reset-email', TouristController.resetPassword);
 
+touristRouter.post('/edit-account', TouristController.updateProfile);
+
 touristRouter.get('/', (req, res) => {
     res.status(200).json({ status: true, success: "connected now" });
 });

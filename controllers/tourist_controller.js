@@ -1,4 +1,10 @@
 const TouristService = require("../services/tourist_service");
+const admin = require("../config/fb");
+const bucket = admin.storage().bucket();//firebase storage bucket
+const multer = require('multer');
+const uuid = require('uuid-v4');
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 exports.signup = async (req, res, next) => {
   try {
@@ -141,3 +147,56 @@ exports.resetPassword = async (req, res, next) => {
 
 
 };
+
+exports.updateProfile = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).send("No image");
+    }
+
+    const metadata = {
+      metadata: {
+        firebaseStorageDownloadTokens: uuid()
+      },
+      contentType: req.file.mimetype,
+      cacheControl: "public, max-age=31536000"
+    };
+
+    const blob = bucket.file(req.file.originalname);
+    const blobStream = blob.createWriteStream({
+      metadata: metadata,
+      gzip: true
+    });
+
+    blobStream.on("error", (err) => {
+      console.error(err);
+      res.status(500).json({ message: 'Unable to upload' });
+    });
+
+    blobStream.on("finish", async () => {
+      const imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
+      const { firstName, lastName, password } = req.body;
+
+
+      const token = req.headers.authorization.split(' ')[1];
+      const touristData = await TouristService.getInfoFromToken(token);
+
+      const tourist = await TouristService.getTouristByEmail(touristData.email);
+      if (!tourist) {
+        throw new Error('User does not exist');
+      }
+
+      const updatedUser = await TouristService.updateProfile(firstName, lastName, touristData.email, password, imageUrl);
+      if (!updatedUser) {
+        throw new Error('User does not exist');
+      }
+    });
+
+    blobStream.end(req.file.buffer);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+

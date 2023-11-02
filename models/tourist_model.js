@@ -29,6 +29,9 @@ const touristSchema = new mongoose.Schema({
     type: String,
     required: [true, "Password is required"],
   },
+  profileImage: {
+    type: String,
+  },
   remember_me: {
     type: String,
   },
@@ -47,7 +50,7 @@ const touristSchema = new mongoose.Schema({
   healthIssues: {
     type: [String], // Array of strings for family member names
   },
-  
+
 });
 
 // Middleware to hash the password before saving it
