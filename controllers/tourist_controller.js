@@ -161,7 +161,8 @@ exports.updateProfile = async (req, res, next) => {
       },
       contentType: req.file.mimetype,
       cacheControl: "public, max-age=31536000"
-    };
+    };    
+    
     console.log("two");
     const blob = bucket.file(req.file.originalname);
     const blobStream = blob.createWriteStream({
