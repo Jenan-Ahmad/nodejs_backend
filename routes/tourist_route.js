@@ -17,6 +17,14 @@ touristRouter.post('/send-reset-email', TouristController.resetPassword);
 
 touristRouter.post('/edit-account', TouristController.updateProfile);
 
+// touristRouter.post('/get-image-url', TouristController.getProfileImage);
+touristRouter.post('/get-image-url', (req, res) => {
+    // Replace this with your MongoDB retrieval logic
+    const imageUrl = 'https://storage.googleapis.com/touristine-9a51a.appspot.com/Cat_August_2010-4.jpg';
+  
+    res.json({ imageUrl });
+  });
+  
 touristRouter.get('/', (req, res) => {
     res.status(200).json({ status: true, success: "connected now" });
 });
