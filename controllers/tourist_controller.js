@@ -178,7 +178,7 @@ exports.updateProfile = async (req, res, next) => {
       console.log("four");
       blobStream.on("finish", async () => {
         console.log("five");
-        const imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+        const imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
         console.log("six");
         const { firstName, lastName, password } = req.body;
 
