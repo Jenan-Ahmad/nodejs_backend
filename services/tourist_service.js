@@ -112,7 +112,7 @@ class TouristService {
       password = await tourist.encryptPassword(password);
       return TouristModel.updateOne({ email: email }, { $set: { firstName: firstName, lastName: lastName, password: password, profileImage: imageUrl } });
     } catch (error) {
-      return res.status(500).json({ message: 'An error occurred updating the profile' });
+      throw new Error("An error occurred updating your profile");
     }
   }
 
