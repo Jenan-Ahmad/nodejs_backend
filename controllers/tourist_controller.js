@@ -129,24 +129,15 @@ exports.resetPassword = async (req, res, next) => {
   }
 };
 
+
 exports.updateProfile = async (req, res, next) => {
   try {
-    const { firstName, lastName, password } = req.body;
-    const token = req.headers.authorization.split(' ')[1];
-    const touristData = await TouristService.getEmailFromToken(token);
-    const tourist = await TouristService.getTouristByEmail(touristData.email);
-    if (!tourist) {
-      return res.status(500).json('User does not exist');
-    }
-    upload.single('profileImage')(req, res, async (err) => {
+    upload.single('profileImage')(req, res, (err) => {
       if (!req.file) {
         console.log("no image");
-        const updatedUser = await TouristService.updateProfile(firstName, lastName, touristData.email, password, "");
-        if (!updatedUser) {
-          return res.status(500).json({ message: 'User does not exist' });
-        }
-        return res.status(200).json({ message: 'Updated Successfully' });
+        return res.status(400).send("No image");
       }
+      console.log("one");
       const metadata = {
         metadata: {
           firebaseStorageDownloadTokens: uuid()
@@ -154,30 +145,49 @@ exports.updateProfile = async (req, res, next) => {
         contentType: req.file.mimetype,
         cacheControl: "public, max-age=31536000"
       };
-      const folder = 'profile_images'; // Specify your desired folder name
-      const fileName = `${folder}/${req.file.originalname}`;
-      const blob = bucket.file(fileName);
+
+      console.log("two");
+      const blob = bucket.file(req.file.originalname);
       const blobStream = blob.createWriteStream({
         metadata: metadata,
         gzip: true
       });
+      console.log("three");
       blobStream.on("error", (err) => {
         console.error(err);
-        return res.status(500).json({ message: 'Unable to upload' });
+        res.status(500).json({ message: 'Unable to upload' });
       });
+      console.log("four");
       blobStream.on("finish", async () => {
+        console.log("five");
         const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${blob.name}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
+        console.log("six");
+        const { firstName, lastName, password } = req.body;
+
+        console.log("seven");
+        const token = req.headers.authorization.split(' ')[1];
+        console.log("eight");
+        const touristData = await TouristService.getEmailFromToken(token);
+        console.log("nine");
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        if (!tourist) {
+          throw new Error('User does not exist');
+        }
+        console.log("ten");
         const updatedUser = await TouristService.updateProfile(firstName, lastName, touristData.email, password, imageUrl);
+        console.log("eleven");
         if (!updatedUser) {
-          return res.status(500).json({ message: 'User does not exist' });
+          throw new Error('User does not exist');
         }
       });
+      console.log("twelve");
       blobStream.end(req.file.buffer);
-      return res.status(200).json({ message: 'Updated Successfully' });
+      console.log("thirteen");
+      return res.status(200).json({ message: 'updated' });
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Updating Failed' });
+    next(error);
   }
 };
 
