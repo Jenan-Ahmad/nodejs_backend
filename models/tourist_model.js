@@ -36,13 +36,7 @@ const touristSchema = new mongoose.Schema({
     type: String,
   },
   location: {
-    type: {
-      type: String,
-      enum: ['Point'], // Specify the data type as 'Point'
-    },
-    coordinates: {
-      type: [Number], // Array of two numbers: [longitude, latitude]
-    },
+    
   },
   healthIssues: {
     type: [String], // Array of strings for family member names

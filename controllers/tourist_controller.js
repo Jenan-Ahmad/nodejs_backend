@@ -80,17 +80,17 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(500).json('All fields must be filled');
+      return res.status(500).json({ message: 'All fields must be filled' });
     }
     const tourist = await TouristService.getTouristByEmail(email);
     if (!tourist) {
       //will check if admin
       //if not throw error
-      return res.status(500).json('User does not exist');
+      return res.status(500).json({ message: 'User does not exist' });
     } else {//if tourist
       const isPasswordCorrect = await tourist.comparePassword(password);
       if (isPasswordCorrect == false) {
-        return res.status(500).json(`Username or Password does not match`);
+        return res.status(500).json({ message: `Username or Password does not match` });
       }
       // Creating Token
       const tokenData = { email: tourist.email };
@@ -143,9 +143,9 @@ exports.updateProfile = async (req, res, next) => {
         console.log("no image");
         const updatedUser = await TouristService.updateProfile(firstName, lastName, touristData.email, password, "");
         if (!updatedUser) {
-          return res.status(500).json('User does not exist');
+          return res.status(500).json({ message: 'User does not exist' });
         }
-        return res.status(200).send('Updated Successfully');
+        return res.status(200).json({ message: 'Updated Successfully' });
       }
       const metadata = {
         metadata: {
@@ -169,7 +169,7 @@ exports.updateProfile = async (req, res, next) => {
         const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${blob.name}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
         const updatedUser = await TouristService.updateProfile(firstName, lastName, touristData.email, password, imageUrl);
         if (!updatedUser) {
-          return res.status(500).json('User does not exist');
+          return res.status(500).json({ message: 'User does not exist' });
         }
       });
       blobStream.end(req.file.buffer);
@@ -181,3 +181,19 @@ exports.updateProfile = async (req, res, next) => {
   }
 };
 
+exports.updateLocation = async (req, res, next) => {
+  console.log("------------------Update Location------------------");
+  console.log("---req body---", req.body);
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const touristData = await TouristService.getEmailFromToken(token);
+    const tourist = await TouristService.getTouristByEmail(touristData.email);
+    if (!tourist) {
+      return res.status(500).json('User does not exist');
+    }
+    const { latitude, longitude, address } = req.body;
+
+  } catch (error) {
+
+  }
+};
