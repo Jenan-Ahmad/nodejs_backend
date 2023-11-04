@@ -96,14 +96,6 @@ class TouristService {
     }
   }
 
-  static async updateRememberMe(email, remember_me) {
-    try {
-      return TouristModel.updateOne({ email: email }, { $set: { remember_me: remember_me } });
-    } catch (error) {
-      throw new Error("An error occurred updating the remember_me value");
-    }
-  }
-
   static async updatePassword(email, password) {
     try {
       const tourist = new TouristModel();
@@ -155,6 +147,22 @@ class TouristService {
     });
   }
 
+  static async getEmailFromToken(token) {
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, 'secret', (err, decoded) => {
+        if (err) {
+          reject('Invalid token');
+        } else {
+          // You can access user data from the 'decoded' object
+          const { email } = decoded;
+          resolve({ email });
+        }
+      });
+    });
+  }
+
 }
+
+
 
 module.exports = TouristService;

@@ -32,9 +32,6 @@ const touristSchema = new mongoose.Schema({
   profileImage: {
     type: String,
   },
-  remember_me: {
-    type: String,
-  },
   marital_status: {
     type: String,
   },
