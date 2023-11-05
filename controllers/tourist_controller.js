@@ -170,7 +170,7 @@ exports.updateProfile = async (req, res, next) => {
       });
       blobStream.on("finish", async () => {
         const fileUrl = `${folder}%2F${req.file.originalname}`;
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${blob.name}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${fileUrl}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
         const { firstName, lastName, password } = req.body;
 
         const token = req.headers.authorization.split(' ')[1];
