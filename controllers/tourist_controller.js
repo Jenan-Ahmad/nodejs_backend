@@ -157,8 +157,8 @@ exports.updateProfile = async (req, res, next) => {
         contentType: req.file.mimetype,
         cacheControl: "public, max-age=31536000"
       };
-      const folder = 'profile_images%2F'; // Specify your desired folder name
-      const fileName = `${folder}${req.file.originalname}`;
+      const folder = 'profile_images'; // Specify your desired folder name
+      const fileName = `${folder}/${req.file.originalname}`;
       const blob = bucket.file(fileName);
       const blobStream = blob.createWriteStream({
         metadata: metadata,
@@ -169,6 +169,7 @@ exports.updateProfile = async (req, res, next) => {
         res.status(500).json({ message: 'Unable to upload' });
       });
       blobStream.on("finish", async () => {
+        const fileUrl = `${folder}%2F${req.file.originalname}`;
         const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${blob.name}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
         const { firstName, lastName, password } = req.body;
 
