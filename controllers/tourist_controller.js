@@ -157,8 +157,9 @@ exports.updateProfile = async (req, res, next) => {
         contentType: req.file.mimetype,
         cacheControl: "public, max-age=31536000"
       };
-
-      const blob = bucket.file(req.file.originalname);
+      const folder = 'profile_images'; // Specify your desired folder name
+      const fileName = `${folder}/${req.file.originalname}`;
+      const blob = bucket.file(fileName);
       const blobStream = blob.createWriteStream({
         metadata: metadata,
         gzip: true
