@@ -189,7 +189,7 @@ exports.updateProfile = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    next(error);
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -212,7 +212,7 @@ exports.updateLocation = async (req, res, next) => {
 
   } catch (error) {
     console.error(error);
-    next(error);
+    return res.status(500).json({ error: error.message });
   }
 };
 

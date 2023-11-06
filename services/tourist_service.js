@@ -129,9 +129,9 @@ class TouristService {
   static async updateLocation(email, latitude, longitude, address) {
     try {
       const tourist = new TouristModel();
-      password = await tourist.encryptPassword(password);
       return TouristModel.updateOne({ email: email }, { $set: { 'location.latitude': latitude, 'location.longitude': longitude, 'location.address': address } });
     } catch (error) {
+      console.error(error);
       throw new Error("An error occurred updating your location");
     }
   }
