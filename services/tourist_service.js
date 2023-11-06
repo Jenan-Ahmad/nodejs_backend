@@ -116,6 +116,26 @@ class TouristService {
     }
   }
 
+  static async updateProfile(firstName, lastName, email, password, imageUrl) {
+    try {
+      const tourist = new TouristModel();
+      password = await tourist.encryptPassword(password);
+      return TouristModel.updateOne({ email: email }, { $set: { firstName: firstName, lastName: lastName, password: password, profileImage: imageUrl } });
+    } catch (error) {
+      throw new Error("An error occurred updating your profile");
+    }
+  }
+
+  static async updateLocation(email, latitude, longitude, address) {
+    try {
+      const tourist = new TouristModel();
+      password = await tourist.encryptPassword(password);
+      return TouristModel.updateOne({ email: email }, { $set: { 'location.latitude': latitude, 'location.longitude': longitude, 'location.address': address } });
+    } catch (error) {
+      throw new Error("An error occurred updating your location");
+    }
+  }
+
   static async generatePassword() {
     try {
 

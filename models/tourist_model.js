@@ -36,7 +36,15 @@ const touristSchema = new mongoose.Schema({
     type: String,
   },
   location: {
-    
+    longtitude: {
+      type: String,
+    },
+    latitude: {
+      type: String,
+    },
+    address: {
+      type: String,
+    },
   },
   healthIssues: {
     type: [String], // Array of strings for family member names

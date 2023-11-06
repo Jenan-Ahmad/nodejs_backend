@@ -12,7 +12,7 @@ exports.signup = async (req, res, next) => {
     console.log("---req body---", req.body);
     const { firstName, lastName, email, password } = req.body;
     if (!firstName || !lastName || !email || !password) {
-      return res.status(409).json("All mandatory fields must be filled");
+      return res.status(409).json({ message: "All mandatory fields must be filled" });
     }
     const duplicate = await TouristService.getTouristByEmail(email);
     if (duplicate) {
@@ -44,7 +44,7 @@ exports.register = async (req, res, next) => {
     const token = req.query.token;
     const touristData = await TouristService.getInfoFromToken(token);
     if (!touristData.firstName || !touristData.lastName || !touristData.email || !touristData.password) {
-      return res.status(409).json("All mandatory fields must be filled");
+      return res.status(409).json({ message: "All mandatory fields must be filled" });
     }
     const duplicate = await TouristService.getTouristByEmail(touristData.email);
     if (duplicate) {
@@ -62,7 +62,7 @@ exports.isVerified = async (req, res, next) => {
   console.log("------------------Is Verified------------------");
   const { email } = req.body;
   if (!email) {
-    throw new Error('No email was given');
+    return res.status(500).json({ error: "No email was given" });
   }
   const tourist = await TouristService.getTouristByEmail(email);
   if (!tourist) {
@@ -80,17 +80,17 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(500).json({ message: 'All fields must be filled' });
+      return res.status(500).json({ error: 'All fields must be filled' });
     }
     const tourist = await TouristService.getTouristByEmail(email);
     if (!tourist) {
       //will check if admin
       //if not throw error
-      return res.status(500).json({ message: 'User does not exist' });
+      return res.status(500).json({ error: 'User does not exist' });
     } else {//if tourist
       const isPasswordCorrect = await tourist.comparePassword(password);
       if (isPasswordCorrect == false) {
-        return res.status(500).json({ message: `Username or Password does not match` });
+        return res.status(500).json({ error: 'Username or Password does not match' });
       }
       // Creating Token
       const tokenData = { email: tourist.email };
@@ -109,16 +109,16 @@ exports.resetPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
     if (!email) {
-      return res.status(500).json('No email address was received');
+      return res.status(500).json({ error: 'No email address was received' });
     }
     const tourist = await TouristService.getTouristByEmail(email);
     if (!tourist) {
-      return res.status(500).json('User does not exist');
+      return res.status(500).json({ error: 'User does not exist' });
     }
     const password = await TouristService.generatePassword();
     const updatedUser = await TouristService.updatePassword(email, password);
     if (!updatedUser) {
-      return res.status(500).json('User does not exist');
+      return res.status(500).json({ error: 'User does not exist' });
     }
     await TouristService.resetPassword(email, password);
     //send email with the new password
@@ -128,7 +128,6 @@ exports.resetPassword = async (req, res, next) => {
     return res.status(500).json({ error: error.message });
   }
 };
-
 
 exports.updateProfile = async (req, res, next) => {
   try {
@@ -168,9 +167,10 @@ exports.updateProfile = async (req, res, next) => {
         console.error(err);
         res.status(500).json({ message: 'Unable to upload' });
       });
+      const imageUrl = '';
       blobStream.on("finish", async () => {
         const fileUrl = `${folder}%2F${req.file.originalname}`;
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${fileUrl}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
+        imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${fileUrl}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
         const { firstName, lastName, password } = req.body;
 
         const token = req.headers.authorization.split(' ')[1];
@@ -185,7 +185,7 @@ exports.updateProfile = async (req, res, next) => {
         }
       });
       blobStream.end(req.file.buffer);
-      return res.status(200).json({ message: 'updated' });
+      return res.status(200).json({ message: 'updated', imageUrl: imageUrl });
     });
   } catch (error) {
     console.error(error);
@@ -204,8 +204,38 @@ exports.updateLocation = async (req, res, next) => {
       return res.status(500).json('User does not exist');
     }
     const { latitude, longitude, address } = req.body;
+    const updatedUser = await TouristService.updateLocation(tourist.email, latitude, longitude, address);
+    if (!updatedUser) {
+      throw new Error('User does not exist');
+    }
+    return res.status(200).json({ message: 'updated' });
 
   } catch (error) {
-
+    console.error(error);
+    next(error);
   }
 };
+
+exports.updateInterests = async (req, res, next) => {
+  console.log("------------------Update Interests------------------");
+  console.log("---req body---", req.body);
+  // try {
+  //   const token = req.headers.authorization.split(' ')[1];
+  //   const touristData = await TouristService.getEmailFromToken(token);
+  //   const tourist = await TouristService.getTouristByEmail(touristData.email);
+  //   if (!tourist) {
+  //     return res.status(500).json('User does not exist');
+  //   }
+  //   const {  } = req.body;
+  //   const updatedUser = await TouristService.(tourist.email, );
+  //   if (!updatedUser) {
+  //     throw new Error('User does not exist');
+  //   }
+  //   return res.status(200).json({ message: 'updated' });
+
+  // } catch (error) {
+  //   console.error(error);
+  //   next(error);
+  // }
+};
+
