@@ -167,7 +167,7 @@ exports.updateProfile = async (req, res, next) => {
         console.error(err);
         res.status(500).json({ message: 'Unable to upload' });
       });
-      const imageUrl = '';
+      var imageUrl = '';
       blobStream.on("finish", async () => {
         const fileUrl = `${folder}%2F${req.file.originalname}`;
         imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${fileUrl}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;

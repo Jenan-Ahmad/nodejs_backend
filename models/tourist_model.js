@@ -36,7 +36,7 @@ const touristSchema = new mongoose.Schema({
     type: String,
   },
   location: {
-    longtitude: {
+    longitude: {
       type: String,
     },
     latitude: {
