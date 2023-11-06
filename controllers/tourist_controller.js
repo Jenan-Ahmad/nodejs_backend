@@ -219,23 +219,42 @@ exports.updateLocation = async (req, res, next) => {
 exports.updateInterests = async (req, res, next) => {
   console.log("------------------Update Interests------------------");
   console.log("---req body---", req.body);
-  // try {
-  //   const token = req.headers.authorization.split(' ')[1];
-  //   const touristData = await TouristService.getEmailFromToken(token);
-  //   const tourist = await TouristService.getTouristByEmail(touristData.email);
-  //   if (!tourist) {
-  //     return res.status(500).json('User does not exist');
-  //   }
-  //   const {  } = req.body;
-  //   const updatedUser = await TouristService.(tourist.email, );
-  //   if (!updatedUser) {
-  //     throw new Error('User does not exist');
-  //   }
-  //   return res.status(200).json({ message: 'updated' });
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const touristData = await TouristService.getEmailFromToken(token);
+    const tourist = await TouristService.getTouristByEmail(touristData.email);
+    if (!tourist) {
+      return res.status(500).json('User does not exist');
+    }
+    const { BudgetFriendly,
+      MidRange,
+      Luxurious,
+      family,
+      friends,
+      solo,
+      coastalAreas,
+      mountains,
+      nationalParks,
+      majorCities,
+      countrySide,
+      historicalSites,
+      religiousLandmarks,
+      Yes,
+      No,
+      mobility = 'false',
+      visual = 'false',
+      hearing = 'false',
+      cognitive = 'false',
+      diabetes = 'false' } = req.body;
+    const updatedUser = await TouristService.updateInterests(tourist.email, BudgetFriendly, MidRange, Luxurious, family, friends, solo, coastalAreas, mountains, nationalParks, majorCities, countrySide, historicalSites, religiousLandmarks, Yes, No, mobility, visual, hearing, cognitive, diabetes);
+    if (!updatedUser) {
+      throw new Error('User does not exist');
+    }
+    return res.status(200).json({ message: 'updated' });
 
-  // } catch (error) {
-  //   console.error(error);
-  //   next(error);
-  // }
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 };
 

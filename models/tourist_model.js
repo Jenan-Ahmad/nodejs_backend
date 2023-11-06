@@ -46,9 +46,68 @@ const touristSchema = new mongoose.Schema({
       type: String,
     },
   },
-  healthIssues: {
-    type: [String], // Array of strings for family member names
-  },
+  interests: {
+    BudgetFriendly: {
+      type: String,
+    },
+    MidRange: {
+      type: String,
+    },
+    Luxurious: {
+      type: String,
+    },
+    family: {
+      type: String,
+    },
+    friends: {
+      type: String,
+    },
+    solo: {
+      type: String,
+    },
+    coastalAreas: {
+      type: String,
+    },
+    mountains: {
+      type: String,
+    },
+    nationalParks: {
+      type: String,
+    },
+    majorCities: {
+      type: String,
+    },
+    countrySide: {
+      type: String,
+    },
+    historicalSites: {
+      type: String,
+    },
+    religiousLandmarks: {
+      type: String,
+    },
+    Yes: {
+      type: String,
+    },
+    No: {
+      type: String,
+    },
+    mobility: {
+      type: String,
+    },
+    visual: {
+      type: String,
+    },
+    hearing: {
+      type: String,
+    },
+    cognitive: {
+      type: String,
+    },
+    diabetes: {
+      type: String,
+    },
+  }
 
 });
 
