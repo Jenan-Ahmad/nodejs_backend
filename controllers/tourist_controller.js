@@ -167,10 +167,9 @@ exports.updateProfile = async (req, res, next) => {
         console.error(err);
         res.status(500).json({ message: 'Unable to upload' });
       });
-      var imageUrl = '';
       blobStream.on("finish", async () => {
         const fileUrl = `${folder}%2F${req.file.originalname}`;
-        imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${fileUrl}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${fileUrl}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
         const { firstName, lastName, password } = req.body;
 
         const token = req.headers.authorization.split(' ')[1];
@@ -183,9 +182,9 @@ exports.updateProfile = async (req, res, next) => {
         if (!updatedUser) {
           throw new Error('User does not exist');
         }
+        return res.status(200).json({ message: 'updated', imageUrl: imageUrl });
       });
       blobStream.end(req.file.buffer);
-      return res.status(200).json({ message: 'updated', imageUrl: imageUrl });
     });
   } catch (error) {
     console.error(error);
