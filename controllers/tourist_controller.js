@@ -287,7 +287,7 @@ exports.updateInterests = async (req, res, next) => {
   }
 };
 
-exports.fetchInterests = async (req, res, nexr) => {
+exports.fetchInterests = async (req, res, next) => {
   console.log("------------------Fetch Interests------------------");
   try {
     const token = req.headers.authorization.split(' ')[1];
@@ -303,7 +303,7 @@ exports.fetchInterests = async (req, res, nexr) => {
   }
 };
 
-exports.fetchLocation = async (req, res, nexr) => {
+exports.fetchLocation = async (req, res, next) => {
   console.log("------------------Fetch Interests------------------");
   try {
     const token = req.headers.authorization.split(' ')[1];
