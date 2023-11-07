@@ -135,6 +135,15 @@ class TouristService {
       throw new Error("An error occurred updating your location");
     }
   }
+  static async updateGoogleAccount(email, googleAccount) {
+    try {
+      const tourist = new TouristModel();
+      return TouristModel.updateOne({ email: email }, { $set: { googleAccount: googleAccount } });
+    } catch (error) {
+      console.error(error);
+      throw new Error("An error occurred updating GoogleAccount");
+    }
+  }
 
   static async updateInterests(email, BudgetFriendly, MidRange, Luxurious, family, friends, solo, coastalAreas, mountains, nationalParks, majorCities, countrySide, historicalSites, religiousLandmarks, Yes, No, mobility, visual, hearing, cognitive, diabetes) {
     try {

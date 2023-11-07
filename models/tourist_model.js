@@ -107,8 +107,10 @@ const touristSchema = new mongoose.Schema({
     diabetes: {
       type: String,
     },
-  }
-
+  },
+  googleAccount: {
+    type: String,
+  },
 });
 
 // Middleware to hash the password before saving it

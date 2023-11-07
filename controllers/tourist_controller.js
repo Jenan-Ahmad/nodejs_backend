@@ -103,6 +103,37 @@ exports.login = async (req, res, next) => {
   }
 };
 
+exports.loginGGL = async (req, res, next) => {
+  console.log("------------------Log In With Google------------------");
+  console.log("---req body---", req.body);
+  try {
+    const { touristData } = req.body;
+    if (!touristData.email || !touristData.password || !touristData.firstName || !touristData.lastName || !touristData.photoURL) {
+      return res.status(500).json({ error: 'Log In with Google Failed' });
+    }
+    const tokenData = { email: touristData.email };
+    const token = await TouristService.generateAccessToken(tokenData, "secret", "1h");
+    const tourist = await TouristService.getTouristByEmail(touristData.email);
+    if (!tourist) {
+      //create new tourist return flag to front
+      const response = await TouristService.registerTourist(token, touristData.firstName, touristData.lastName, touristData.email, touristData.password);
+      const updatedUser = await TouristService.updateProfile(touristData.firstName, touristData.lastName, touristData.email, touristData.password, touristData.photoURL);
+      if (!updatedUser) {
+        throw new Error('Log In with Google Failed');
+      }
+      const updatedUser2 = await TouristService.updateGoogleAccount(touristData.email, 'true')
+      return res.status(200).json({ message: 'User registered', token: token, type: 100, newUser: 'true' });
+    }
+    const updatedUser = await TouristService.updateProfile(touristData.firstName, touristData.lastName, touristData.email, touristData.password, touristData.photoURL);
+    if (!updatedUser) {
+      throw new Error('Log In with Google Failed');
+    }
+    return res.status(200).json({ status: true, success: "sendData", token: token, type: 100, newUser: 'false' });//type 100->tourist
+  } catch (error) {
+    console.log(error, 'err---->');
+    return res.status(500).json({ error: 'Log In with Google Failed' });
+  }
+};
 exports.resetPassword = async (req, res, next) => {
   console.log("------------------Reset Password------------------");
   console.log("---req body---", req.body);
@@ -223,7 +254,7 @@ exports.updateInterests = async (req, res, next) => {
     const touristData = await TouristService.getEmailFromToken(token);
     const tourist = await TouristService.getTouristByEmail(touristData.email);
     if (!tourist) {
-      return res.status(500).json('User does not exist');
+      return res.status(500).json({ error: 'User does not exist' });
     }
     const { BudgetFriendly,
       MidRange,
@@ -247,13 +278,43 @@ exports.updateInterests = async (req, res, next) => {
       diabetes = 'false' } = req.body;
     const updatedUser = await TouristService.updateInterests(tourist.email, BudgetFriendly, MidRange, Luxurious, family, friends, solo, coastalAreas, mountains, nationalParks, majorCities, countrySide, historicalSites, religiousLandmarks, Yes, No, mobility, visual, hearing, cognitive, diabetes);
     if (!updatedUser) {
-      throw new Error('User does not exist');
+      return res.status(500).json({ error: 'User does not exist' });
     }
     return res.status(200).json({ message: 'updated' });
-
   } catch (error) {
     console.error(error);
     next(error);
   }
 };
 
+exports.fetchInterests = async (req, res, nexr) => {
+  console.log("------------------Fetch Interests------------------");
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const touristData = await TouristService.getEmailFromToken(token);
+    const tourist = await TouristService.getTouristByEmail(touristData.email);
+    if (!tourist) {
+      return res.status(500).json({ error: 'User does not exist' });
+    }
+    return res.status(200).json({ BudgetFriendly: tourist.interests.BudgetFriendly, MidRange: tourist.interests.MidRange, Luxurious: tourist.interests.Luxurious, family: tourist.interests.family, friends: tourist.interests.friends, solo: tourist.interests.solo, coastalAreas: tourist.interests.coastalAreas, mountains: tourist.interests.mountains, nationalParks: tourist.interests.nationalParks, majorCities: tourist.interests.majorCities, countrySide: tourist.interests.countrySide, historicalSites: tourist.interests.historicalSites, religiousLandmarks: tourist.interests.religiousLandmarks, Yes: tourist.Yes, No: tourist.interests.No, mobility: tourist.interests.mobility, visual: tourist.interests.visual, hearing: tourist.interests.hearing, cognitive: tourist.interests.cognitive, diabetes: tourist.interests.diabetes });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Couldn\'t fetch your interests' });
+  }
+};
+
+exports.fetchLocation = async (req, res, nexr) => {
+  console.log("------------------Fetch Interests------------------");
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const touristData = await TouristService.getEmailFromToken(token);
+    const tourist = await TouristService.getTouristByEmail(touristData.email);
+    if (!tourist) {
+      return res.status(500).json({ error: 'User does not exist' });
+    }
+    return res.status(200).json({ longitude: tourist.location.longitude, latitude: tourist.location.latitude, address: tourist.location.address });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Couldn\'t fetch your location' });
+  }
+};
