@@ -173,7 +173,7 @@ exports.updateProfile = async (req, res, next) => {
         if (!tourist) {
           throw new Error('User does not exist');
         }
-        const updatedUser = await TouristService.updateProfile(firstName, lastName, touristData.email, password, "");
+        const updatedUser = await TouristService.updateProfile(firstName, lastName, touristData.email, password, touristData.profileImage);
         if (!updatedUser) {
           throw new Error('User does not exist');
         }
