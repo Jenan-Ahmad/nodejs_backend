@@ -107,24 +107,24 @@ exports.loginGGL = async (req, res, next) => {
   console.log("------------------Log In With Google------------------");
   console.log("---req body---", req.body);
   try {
-    const { touristData } = req.body;
-    if (!touristData.email || !touristData.password || !touristData.firstName || !touristData.lastName || !touristData.photoURL) {
+    const { userData } = req.body;
+    if (!userData.email || !userData.password || !userData.firstName || !userData.lastName || !userData.photoURL) {
       return res.status(500).json({ error: 'Log In with Google Failed' });
     }
-    const tokenData = { email: touristData.email };
+    const tokenData = { email: userData.email };
     const token = await TouristService.generateAccessToken(tokenData, "secret", "1h");
-    const tourist = await TouristService.getTouristByEmail(touristData.email);
+    const tourist = await TouristService.getTouristByEmail(userData.email);
     if (!tourist) {
       //create new tourist return flag to front
-      const response = await TouristService.registerTourist(token, touristData.firstName, touristData.lastName, touristData.email, touristData.password);
-      const updatedUser = await TouristService.updateProfile(touristData.firstName, touristData.lastName, touristData.email, touristData.password, touristData.photoURL);
+      const response = await TouristService.registerTourist(token, userData.firstName, userData.lastName, userData.email, userData.password);
+      const updatedUser = await TouristService.updateProfile(userData.firstName, userData.lastName, userData.email, userData.password, userData.photoURL);
       if (!updatedUser) {
         throw new Error('Log In with Google Failed');
       }
-      const updatedUser2 = await TouristService.updateGoogleAccount(touristData.email, 'true')
+      const updatedUser2 = await TouristService.updateGoogleAccount(userData.email, 'true')
       return res.status(200).json({ message: 'User registered', token: token, type: 100, newUser: 'true' });
     }
-    const updatedUser = await TouristService.updateProfile(touristData.firstName, touristData.lastName, touristData.email, touristData.password, touristData.photoURL);
+    const updatedUser = await TouristService.updateProfile(userData.firstName, userData.lastName, userData.email, userData.password, userData.photoURL);
     if (!updatedUser) {
       throw new Error('Log In with Google Failed');
     }
