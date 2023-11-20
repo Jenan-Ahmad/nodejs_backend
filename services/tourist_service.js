@@ -86,7 +86,6 @@ class TouristService {
     }
   }
 
-
   static async getTouristByEmail(email) {
     try {
       return await TouristModel.findOne({ email });
@@ -135,6 +134,7 @@ class TouristService {
       throw new Error("An error occurred updating your location");
     }
   }
+
   static async updateGoogleAccount(email, googleAccount) {
     try {
       const tourist = new TouristModel();
@@ -201,7 +201,5 @@ class TouristService {
   }
 
 }
-
-
 
 module.exports = TouristService;

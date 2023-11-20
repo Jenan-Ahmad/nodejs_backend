@@ -1,7 +1,7 @@
 const app = require("./app");
-// const UserModel = require('./models/user.model')
 const db = require('./config/db')
 const touristRouter = require('./routes/tourist_route');
+const destinationRouter = require('./routes/destination_route');
 
 const port = 3000;
 
