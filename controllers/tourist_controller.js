@@ -270,6 +270,9 @@ exports.updateInterests = async (req, res, next) => {
       countrySide,
       historicalSites,
       religiousLandmarks,
+      aquariums,
+      zoos,
+      others,
       Yes,
       No,
       mobility = 'false',
@@ -277,7 +280,7 @@ exports.updateInterests = async (req, res, next) => {
       hearing = 'false',
       cognitive = 'false',
       diabetes = 'false' } = req.body;
-    const updatedUser = await TouristService.updateInterests(tourist.email, BudgetFriendly, MidRange, Luxurious, family, friends, solo, coastalAreas, mountains, nationalParks, majorCities, countrySide, historicalSites, religiousLandmarks, Yes, No, mobility, visual, hearing, cognitive, diabetes);
+    const updatedUser = await TouristService.updateInterests(tourist.email, BudgetFriendly, MidRange, Luxurious, family, friends, solo, coastalAreas, mountains, nationalParks, majorCities, countrySide, historicalSites, religiousLandmarks, aquariums, zoos, others, Yes, No, mobility, visual, hearing, cognitive, diabetes);
     if (!updatedUser) {
       return res.status(500).json({ error: 'User does not exist' });
     }
@@ -297,7 +300,15 @@ exports.fetchInterests = async (req, res, next) => {
     if (!tourist) {
       return res.status(500).json({ error: 'User does not exist' });
     }
-    return res.status(200).json({ BudgetFriendly: tourist.interests.BudgetFriendly, MidRange: tourist.interests.MidRange, Luxurious: tourist.interests.Luxurious, family: tourist.interests.family, friends: tourist.interests.friends, solo: tourist.interests.solo, coastalAreas: tourist.interests.coastalAreas, mountains: tourist.interests.mountains, nationalParks: tourist.interests.nationalParks, majorCities: tourist.interests.majorCities, countrySide: tourist.interests.countrySide, historicalSites: tourist.interests.historicalSites, religiousLandmarks: tourist.interests.religiousLandmarks, Yes: tourist.interests.Yes, No: tourist.interests.No, mobility: tourist.interests.mobility, visual: tourist.interests.visual, hearing: tourist.interests.hearing, cognitive: tourist.interests.cognitive, diabetes: tourist.interests.diabetes });
+    return res.status(200).json({
+      BudgetFriendly: tourist.interests.BudgetFriendly, MidRange: tourist.interests.MidRange, Luxurious: tourist.interests.Luxurious,
+      family: tourist.interests.family, friends: tourist.interests.friends, solo: tourist.interests.solo,
+      coastalAreas: tourist.interests.coastalAreas, mountains: tourist.interests.mountains, nationalParks: tourist.interests.nationalParks,
+      majorCities: tourist.interests.majorCities, countrySide: tourist.interests.countrySide, historicalSites: tourist.interests.historicalSites,
+      religiousLandmarks: tourist.interests.religiousLandmarks, aquariums: tourist.interests.aquariums, zoos: tourist.interests.zoos, others: tourist.interests.others,
+      Yes: tourist.interests.Yes, No: tourist.interests.No,
+      mobility: tourist.interests.mobility, visual: tourist.interests.visual, hearing: tourist.interests.hearing, cognitive: tourist.interests.cognitive, diabetes: tourist.interests.diabetes
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Couldn\'t fetch your interests' });

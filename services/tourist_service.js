@@ -145,10 +145,21 @@ class TouristService {
     }
   }
 
-  static async updateInterests(email, BudgetFriendly, MidRange, Luxurious, family, friends, solo, coastalAreas, mountains, nationalParks, majorCities, countrySide, historicalSites, religiousLandmarks, Yes, No, mobility, visual, hearing, cognitive, diabetes) {
+  static async updateInterests(email, BudgetFriendly, MidRange, Luxurious, family, friends, solo, coastalAreas, mountains, nationalParks, majorCities, countrySide, historicalSites, religiousLandmarks, aquariums, zoos, others, Yes, No, mobility, visual, hearing, cognitive, diabetes) {
     try {
       const tourist = new TouristModel();
-      return TouristModel.updateOne({ email: email }, { $set: { 'interests.BudgetFriendly': BudgetFriendly, 'interests.MidRange': MidRange, 'interests.Luxurious': Luxurious, 'interests.family': family, 'interests.friends': friends, 'interests.solo': solo, 'interests.coastalAreas': coastalAreas, 'interests.mountains': mountains, 'interests.nationalParks': nationalParks, 'interests.majorCities': majorCities, 'interests.countrySide': countrySide, 'interests.historicalSites': historicalSites, 'interests.religiousLandmarks': religiousLandmarks, 'interests.Yes': Yes, 'interests.No': No, 'interests.mobility': mobility, 'interests.visual': visual, 'interests.hearing': hearing, 'interests.cognitive': cognitive, 'interests.diabetes': diabetes } });
+      return TouristModel.updateOne({ email: email },
+        {
+          $set: {
+            'interests.BudgetFriendly': BudgetFriendly, 'interests.MidRange': MidRange, 'interests.Luxurious': Luxurious,
+            'interests.family': family, 'interests.friends': friends, 'interests.solo': solo,
+            'interests.coastalAreas': coastalAreas, 'interests.mountains': mountains, 'interests.nationalParks': nationalParks,
+            'interests.majorCities': majorCities, 'interests.countrySide': countrySide, 'interests.historicalSites': historicalSites,
+            'interests.religiousLandmarks': religiousLandmarks, 'interests.aquariums': aquariums, 'interests.zoos': zoos, 'interests.others': others,
+            'interests.Yes': Yes, 'interests.No': No,
+            'interests.mobility': mobility, 'interests.visual': visual, 'interests.hearing': hearing, 'interests.cognitive': cognitive, 'interests.diabetes': diabetes
+          }
+        });
     } catch (error) {
       console.error(error);
       throw new Error("An error occurred updating your interests");
