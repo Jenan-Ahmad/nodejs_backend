@@ -242,7 +242,7 @@ exports.getDestinationLatLng = async (req, res, next) => {
         if (!tourist) {
             return res.status(500).json({ error: 'User does not exist' });
         }
-        const { destinationName, stars, title, content, date } = req.body;
+        const { destinationName } = req.body;
         const destination = await DestinationService.getDestinationByName(destinationName);
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
@@ -251,6 +251,71 @@ exports.getDestinationLatLng = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Failed to retrieve location" });
+    }
+};
+
+exports.addComplaint = async (req, res, next) => {
+    console.log("------------------Get Destination Lat Lng------------------");
+    try {
+        //verify token
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        if (!tourist) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationName, title, content, date } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        upload.array('images')(req, res, async (err) => {
+            if (!req.files) {
+                console.log("no image");
+                const update = await DestinationService.addComplaint(destination, tourist.email, title, content, date, null);
+                if (!update) {
+                    console.log("failed to add complaint with no images");
+                    throw new Error("Faield to add your complaint");
+                }
+                return res.status(200).json("Your complaint was added");
+            }
+            const imageUrls = [];
+            for (const file of req.files) {
+                const metadata = {
+                    metadata: {
+                        firebaseStorageDownloadTokens: uuid()
+                    },
+                    contentType: file.mimetype,
+                    cacheControl: "public, max-age=31536000"
+                };
+                const folder = 'complaints'; // Specify your desired folder name
+                const fileName = `${folder}/${file.originalname}`;
+                const blob = bucket.file(fileName);
+                const blobStream = blob.createWriteStream({
+                    metadata: metadata,
+                    gzip: true
+                });
+                blobStream.on("error", (err) => {
+                    console.error(err);
+                    res.status(500).json({ message: 'Unable to upload' });
+                });
+                blobStream.on("finish", async () => {
+                    const fileUrl = `${folder}%2F${file.originalname}`;
+                    const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${fileUrl}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
+                    imageUrls.push(imageUrl);
+                });
+                blobStream.end(file.buffer);
+            }
+            const update = await DestinationService.addComplaint(destination, tourist.email, title, content, date, imageUrls);
+            if (!update) {
+                console.log("failed to add complaint with no images");
+                throw new Error("Faield to add your complaint");
+            }
+            return res.status(200).json("Your complaint was added");
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to send your complaint" });
     }
 };
 

@@ -11,6 +11,7 @@ destinationRouter.post('/get-all-reviews', DestinationController.getAllReviews);
 destinationRouter.post('/get-review-data', DestinationController.getReviewData);
 destinationRouter.post('/send-review-data', DestinationController.sendReviewData);
 destinationRouter.post('/get-destination-lat-lng', DestinationController.getDestinationLatLng);
+destinationRouter.post('/send-complaint', DestinationController.addComplaint);
 
 
 destinationRouter.post('/get-weather', DestinationController.getWeather);

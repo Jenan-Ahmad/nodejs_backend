@@ -245,6 +245,25 @@ class DestinationService {
     points += destination.viewedTimes * 2;
   }
 
+  static async addComplaint(destination, email, title, complaint, date, images) {
+    try {
+      return DestinationModel.updateOne(
+        { name: destination.name },
+        {
+          $push: {
+            comlpaints: {
+              email: email, date: date, title: title, complaint: complaint, images: images
+            }
+          }
+        }
+      );
+    } catch (error) {
+      throw new Error("An error occurred adding your complaint");
+    }
+  }
+
+  // static async getComplaints
+
   static async getWeather(location) {
     try {
       const response = await axios.get(`https://wttr.in/${location}?format=%C+%t`);

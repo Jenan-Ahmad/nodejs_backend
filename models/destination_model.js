@@ -148,11 +148,20 @@ const destinationSchema = new mongoose.Schema({
     },
     complaints: [
         {
-            image: [
+            email: {
+                type: String,
+            },
+            images: [
                 {
                     type: String,
                 },
             ],
+            date: {
+                type: String,
+            },
+            title: {
+                type: String,
+            },
             complaint: {
                 type: String,
             },
