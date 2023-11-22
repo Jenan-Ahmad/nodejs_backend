@@ -35,7 +35,7 @@ const destinationSchema = new mongoose.Schema({
             },
         ],
     },
-    category: {//might be separated to main and sub
+    category: {
         type: String,
     },
     services: [

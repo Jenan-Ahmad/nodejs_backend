@@ -59,6 +59,49 @@ class DestinationService {
     }
   }
 
+  static async updateRating(destination, newRating, oldRating) {
+    try {
+      switch (oldRating) {
+        case 1:
+          DestinationModel.updateOne({ name: destination.name }, { $set: { oneStar: (destination.oneStar - 1) } });
+          break;
+        case 2:
+          DestinationModel.updateOne({ name: destination.name }, { $set: { twoStars: (destination.twoStars - 1) } });
+          break;
+        case 3:
+          DestinationModel.updateOne({ name: destination.name }, { $set: { threeStars: (destination.threeStars - 1) } });
+          break;
+        case 4:
+          DestinationModel.updateOne({ name: destination.name }, { $set: { fourStars: (destination.fourStars - 1) } });
+          break;
+        case 5: DestinationModel.updateOne({ name: destination.name }, { $set: { fiveStars: (destination.fiveStars - 1) } });
+          break;
+        default:
+          break;
+      }
+      switch (newRating) {
+        case 1:
+          DestinationModel.updateOne({ name: destination.name }, { $set: { oneStar: (destination.oneStar + 1) } });
+          break;
+        case 2:
+          DestinationModel.updateOne({ name: destination.name }, { $set: { twoStars: (destination.twoStars + 1) } });
+          break;
+        case 3:
+          DestinationModel.updateOne({ name: destination.name }, { $set: { threeStars: (destination.threeStars + 1) } });
+          break;
+        case 4:
+          DestinationModel.updateOne({ name: destination.name }, { $set: { fourStars: (destination.fourStars + 1) } });
+          break;
+        case 5: DestinationModel.updateOne({ name: destination.name }, { $set: { fiveStars: (destination.fiveStars + 1) } });
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      throw new Error("An error occurred updating the ratings");
+    }
+  }
+
   static async calculatePoints(tourist, destination) {
     console.log("calculating points-------------------");
     try {
@@ -66,11 +109,9 @@ class DestinationService {
       console.log("address---------------");
       console.log(tourist.location?.address?.toLowerCase());
       if (destination.location?.address?.toLowerCase() === tourist.location?.address?.toLowerCase()) {
-        console.log("33---------------");
         points += 10;
       }
       console.log("category---------------");
-
       switch (destination.category?.toLowerCase()) {
         case 'coastalareas':
           if (tourist.interests.coastalAreas === "true") {
@@ -107,11 +148,25 @@ class DestinationService {
             points += 15;
           }
           break;
+        case 'aquariums':
+          if (tourist.interests.aquariums === "true") {
+            points += 15;
+          }
+          break;
+        case 'zoos':
+          if (tourist.interests.zoos === "true") {
+            points += 15;
+          }
+          break;
+        case 'others':
+          if (tourist.interests.zoos === "others") {
+            points += 15;
+          }
+          break;
         default:
           break;
       }
       console.log("budget---------------");
-
       switch (destination.budget?.toLowerCase()) {
         case ("budgetfriendly"):
           if (tourist.interests?.BudgetFriendly?.toLowerCase() === "true") {
@@ -150,7 +205,6 @@ class DestinationService {
           break;
       }
       console.log("vtypes---------------");
-
       destination.visitorsType?.forEach(type => {
         if ((type.toLowerCase() === "family") && (tourist.interests?.family === "true")) {
           points += 10;
@@ -161,7 +215,6 @@ class DestinationService {
         }
       });
       console.log("weather---------------");
-
       if ((destination.category?.toLowerCase() != "historicalsites") && (destination.category?.toLowerCase() != "religiouslandmarks")) {
         const weatherDetails = await this.getWeather(destination.location.address);
         if (weatherDetails.toLowerCase().includes("rain")) {
@@ -178,7 +231,6 @@ class DestinationService {
         points += 10;
       }
       console.log("services---------------");
-
       destination.services?.forEach(service => {
         switch (service.name.toLowerCase()) {
           case "restrooms":
@@ -247,11 +299,12 @@ class DestinationService {
 
   static async addComplaint(destination, email, title, complaint, date, images) {
     try {
+      console.log(destination.name, title, complaint, email, images.length);
       return DestinationModel.updateOne(
         { name: destination.name },
         {
           $push: {
-            comlpaints: {
+            complaints: {
               email: email, date: date, title: title, complaint: complaint, images: images
             }
           }
@@ -262,7 +315,13 @@ class DestinationService {
     }
   }
 
-  // static async getComplaints
+  static async incrementViewedTimes(destination) {
+    try {
+      return DestinationModel.updateOne({ name: destination.name }, { $set: { viewedTimes: (destination.viewedTimes + 1) } });
+    } catch (error) {
+      throw new Error("An error occurred updating the password value");
+    }
+  };
 
   static async getWeather(location) {
     try {
