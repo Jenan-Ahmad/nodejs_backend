@@ -255,21 +255,22 @@ exports.getDestinationLatLng = async (req, res, next) => {
 };
 
 exports.addComplaint = async (req, res, next) => {
-    console.log("------------------Get Destination Lat Lng------------------");
+    console.log("------------------Add Complaint------------------");
     try {
-        //verify token
-        const token = req.headers.authorization.split(' ')[1];
-        const touristData = await TouristService.getEmailFromToken(token);
-        const tourist = await TouristService.getTouristByEmail(touristData.email);
-        if (!tourist) {
-            return res.status(500).json({ error: 'User does not exist' });
-        }
-        const { destinationName, title, content, date } = req.body;
-        const destination = await DestinationService.getDestinationByName(destinationName);
-        if (!destination) {
-            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
-        }
+
         upload.array('images')(req, res, async (err) => {
+            //verify token
+            const token = req.headers.authorization.split(' ')[1];
+            const touristData = await TouristService.getEmailFromToken(token);
+            const tourist = await TouristService.getTouristByEmail(touristData.email);
+            if (!tourist) {
+                return res.status(500).json({ error: 'User does not exist' });
+            }
+            const { destinationName, title, content, date } = req.body;
+            const destination = await DestinationService.getDestinationByName(destinationName);
+            if (!destination) {
+                return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+            }
             if (!req.files) {
                 console.log("no image");
                 const update = await DestinationService.addComplaint(destination, tourist.email, title, content, date, null);
