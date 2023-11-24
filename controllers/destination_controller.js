@@ -27,10 +27,10 @@ exports.getRecommendedDestinations = async (req, res, next) => {
             name: destination.name, // Replace with the actual property name in your schema
             image: destination.images.mainImage, // Replace with the actual property name in your schema
         }));
-        res.json(recommendedData);
+        res.status(200).json(recommendedData);
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ Error: error });
+        return res.status(500).json({ error: "Failed to retrieve recommended destinations" });
     }
 };
 
@@ -54,16 +54,15 @@ exports.getPopularDestinations = async (req, res, next) => {
             name: destination.name, // Replace with the actual property name in your schema
             image: destination.images.mainImage, // Replace with the actual property name in your schema
         }));
-        res.json(popularData);
+        res.status(200).json(popularData);
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ Error: error });
+        return res.status(500).json({ error: "Failed to retrieve popular destinations" });
     }
 };
 
 exports.getOtherDestinations = async (req, res, next) => {
     console.log("------------------Get other Destinations------------------");
-
     try {
         //verify token
         const token = req.headers.authorization.split(' ')[1];
@@ -81,9 +80,9 @@ exports.getOtherDestinations = async (req, res, next) => {
             name: destination.name, // Replace with the actual property name in your schema
             image: destination.images.mainImage, // Replace with the actual property name in your schema
         }));
-        res.json(otherData);
+        res.status(200).json(otherData);
     } catch (error) {
-
+        return res.status(500).json({ error: "Failed to other destinations" });
     }
 };
 

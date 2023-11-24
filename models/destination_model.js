@@ -1,7 +1,6 @@
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
-//in arrays might need default: undefined
 const destinationSchema = new mongoose.Schema({
     name: {
         type: String,
