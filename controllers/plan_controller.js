@@ -35,7 +35,7 @@ exports.getPlans = async (req, res, next) => {
 };
 
 exports.deletePlan = async (req, res, next) => {
-    console.log("------------------Get Plans------------------");
+    console.log("------------------Delete Plan------------------");
     try {
         const token = req.headers.authorization.split(' ')[1];
         const touristData = await TouristService.getEmailFromToken(token);
