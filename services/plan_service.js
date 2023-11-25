@@ -15,6 +15,15 @@ const transporter = nodemailer.createTransport({
 });
 class PlanService {
 
+    static async getPlanById(planId) {
+        try {
+            return await PlanModel.findOne({ _id: planId });
+        } catch (err) {
+            console.log(err);
+            throw new Error('An error occurred while retrieving the plan');
+        }
+    }
+
     static async getPlans(email) {
         try {
             return await PlanModel.find({ email: email });

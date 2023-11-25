@@ -8,6 +8,16 @@ const destinationSchema = new mongoose.Schema({
     description: {
         type: String,
     },
+    activityList: [
+        {
+            title: {
+                type: String,
+            },
+            description: {
+                type: String,
+            },
+        },
+    ],
     location: {
         longitude: {
             type: String,

@@ -54,3 +54,36 @@ exports.deletePlan = async (req, res, next) => {
         return res.status(500).json({ error: "Failed to delete the plan" });
     }
 };
+
+exports.fetchPlanContents = async (req, res, next) => {
+    console.log("------------------Fetch Plan Contents------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        if (!tourist) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { planId } = req.body;
+        const plan = await PlanService.getPlanById(planId);
+        if (!plan) {
+            return res.status(500).json({ error: 'Plan does not exist' });
+        }
+        const planData = await Promise.all(plan.destinations.map(async destination => {
+            const destinationData = await DestinationService.getDestinationByName(destination.destination);
+            return {
+                placeName: destination.destination,
+                startTime: destination.startTime,
+                endTime: destination.endTime,
+                activityList: destinationData.activityList,
+                imagePath: destinationData.images.mainImage
+            };
+        }));
+        return res.status(200).json({ planData });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to fetch plan contents" });
+    }
+};
+
+
