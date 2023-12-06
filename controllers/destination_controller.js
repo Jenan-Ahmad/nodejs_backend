@@ -128,8 +128,8 @@ exports.getDestinationDetails = async (req, res, next) => {
         }));
         const destinationDetails = {
             About: destination.description, Category: destination.category,
-            OpeningTime: destination.openingTime, ClosingTime: destination.closingTime,
-            WorkingDays: destination.workingdays, Weather: temperature,
+            OpeningTime: destination.workingHours.openingTime, ClosingTime: destination.workingHours.closingTime,
+            WorkingDays: destination.workingHours.workingdays, Weather: temperature,
             Rating: FRating, CostLevel: destination.budget, sheltered: destination.sheltered,
             EstimatedTime: destination.estimatedDuration.displayedDuration, Services: Services
         };

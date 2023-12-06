@@ -111,32 +111,13 @@ exports.storePlan = async (req, res, next) => {
         var planDuration = await PlanService.getPlanDuration(planDestinations);
         console.log("----------------------planduration", planDuration);
         if (planDuration > tripDuration) {
+            console.log("----------------------------------------------more");
             planDestinations = await PlanService.reducePlan(planDuration, tripDuration, planDestinations, destinationsByCategory, touristCategories, startTime);
         } else if (planDuration < tripDuration) {
             //do this
             console.log("----------------------------------------------less");
-            return res.status(200).json(planDestinations);
-
             planDuration = await PlanService.enlargePlan();
-            while (planDuration + 1 < tripDuration) {
-                console.log("----------------------------------------------less");
-                for (const category in destinationsByCategory) {
-                    if (!touristCategories.includes(category)) {
-                        const categoryArray = destinationsByCategory[category];
-                        if (categoryArray.length > 0) {
-                            const firstDestination = categoryArray[0];
-                            planDestinations.push(firstDestination);
-                            touristCategories.push(category);
-                            planDuration += firstDestination.estimatedDuration.displayedDuration;
-                            break;
-                        }
-                    }
-                }
-            }
         }
-        // const finalPlan = await
-        //need to make sure all places are visited when open, if not, shuffle the array, if theres still a problem
-        //swap
         return res.status(200).json(planDestinations);
     } catch (error) {
         console.log(error);

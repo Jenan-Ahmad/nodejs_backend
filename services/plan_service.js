@@ -302,5 +302,11 @@ class PlanService {
         }
         return planDestinations;
     }
+    
+    static async enlargePlan(){
+            
+
+    }
 }
+
 module.exports = PlanService;  
