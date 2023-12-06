@@ -11,9 +11,9 @@ exports.getRecommendedDestinations = async (req, res, next) => {
     console.log("------------------Get Recommended Destinations------------------");
     try {
         // verify token
-        // const token = req.headers.authorization.split(' ')[1];
-        // const touristData = await TouristService.getEmailFromToken(token);
-        const tourist = await TouristService.getTouristByEmail("jenanahmad182@gmail.com");
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
         if (!tourist) {
             return res.status(500).json({ error: 'User does not exist' });
         }
@@ -39,9 +39,9 @@ exports.getPopularDestinations = async (req, res, next) => {
     console.log("------------------Get Popular Destinations------------------");
     try {
         // verify token
-        // const token = req.headers.authorization.split(' ')[1];
-        // const touristData = await TouristService.getEmailFromToken(token);
-        const tourist = await TouristService.getTouristByEmail("jenanahmad182@gmail.com");
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
         if (!tourist) {
             return res.status(500).json({ error: 'User does not exist' });
         }
@@ -94,9 +94,9 @@ exports.getDestinationDetails = async (req, res, next) => {
     //increment numofviewedtimes
     try {
         //verify token
-        // const token = req.headers.authorization.split(' ')[1];
-        // const touristData = await TouristService.getEmailFromToken(token);
-        const tourist = await TouristService.getTouristByEmail("jenanahmad182@gmail.com");
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
         if (!tourist) {
             return res.status(500).json({ error: 'User does not exist' });
         }
