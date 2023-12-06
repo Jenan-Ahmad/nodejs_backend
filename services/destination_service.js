@@ -5,7 +5,6 @@ const nodemailer = require('nodemailer');
 const axios = require('axios');
 const express = require('express');
 
-
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -30,6 +29,15 @@ class DestinationService {
     } catch (err) {
       console.log(err);
       throw new Error('An error occurred while retrieving the destination by name');
+    }
+  }
+
+  static async getDestinationsInCity(city) {
+    try {
+      return await DestinationModel.find({ 'location.address': city });
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while retrieving the destination by city');
     }
   }
 
@@ -159,7 +167,7 @@ class DestinationService {
           }
           break;
         case 'others':
-          if (tourist.interests.zoos === "others") {
+          if (tourist.interests.others === "others") {
             points += 15;
           }
           break;
@@ -172,33 +180,15 @@ class DestinationService {
           if (tourist.interests?.BudgetFriendly?.toLowerCase() === "true") {
             points += 20;
           }
-          if (tourist.interests?.MidRange?.toLowerCase() === "true") {
-            points += 10;
-          }
-          if (tourist.interests?.Luxurious?.toLowerCase() === "true") {
-            points += 10;
-          }
           break;
         case ("midrange"):
           if (tourist.interests?.MidRange?.toLowerCase() === "true") {
             points += 20;
-            if (tourist.interests?.BudgetFriendly?.toLowerCase() === "true") {
-              points += 10;
-            }
-          }
-          if (tourist.interests?.BudgetFriendly?.Luxurious === "true") {
-            points += 10;
           }
           break;
         case ("luxurious"):
           if (tourist.interests?.Luxurious?.toLowerCase() === "true") {
             points += 20;
-            if (tourist.interests?.MidRange?.toLowerCase() === "true") {
-              points += 10;
-              if (tourist.interests?.BudgetFriendly?.toLowerCase() === "true") {
-                points += 10;
-              }
-            }
           }
           break;
         default:
@@ -207,11 +197,11 @@ class DestinationService {
       console.log("vtypes---------------");
       destination.visitorsType?.forEach(type => {
         if ((type.toLowerCase() === "family") && (tourist.interests?.family === "true")) {
-          points += 10;
+          points += 15;
         } else if ((type.toLowerCase() === "friends") && (tourist.interests?.friends === "true")) {
-          points += 10;
+          points += 15;
         } else if ((type.toLowerCase() === "solo") && (tourist.interests?.solo === "true")) {
-          points += 10;
+          points += 15;
         }
       });
       console.log("weather---------------");
@@ -220,9 +210,9 @@ class DestinationService {
         if (weatherDetails.toLowerCase().includes("rain")) {
           //check for categories concerned with the weather
           if (destination.sheltered === "true") {
-            points += 20;
+            points += 30;
           } else {
-            points -= 20;
+            points -= 30;
           }
         } else {
           points += 10;
@@ -251,13 +241,11 @@ class DestinationService {
             }
             break;
           case "kidsarea":
-            if (destination.category.toLowerCase() === "nationalParks") {
-              points += 20;
-            }
+            points += 15;
             break;
           case "restaurants":
             if ((tourist.family === "true") || (tourist.friends === "true")) {
-              points += 20;
+              points += 15;
             } else {
               points += 10;
             }
@@ -269,10 +257,10 @@ class DestinationService {
             }
             break;
           case "photographers":
-            points += 20;
+            points += 15;
             break;
           case "kiosks":
-            points += 20;
+            points += 15;
             break;
           default:
             break;
@@ -295,6 +283,7 @@ class DestinationService {
     points += destination.rating.fourStars * 15;
     points += destination.rating.fiveStars * 20;
     points += destination.viewedTimes * 2;
+    return points;
   }
 
   static async addComplaint(destination, email, title, complaint, date, images) {
@@ -315,13 +304,15 @@ class DestinationService {
     }
   }
 
-  static async incrementViewedTimes(destination) {
+  static async incrementViewedTimes(name) {
     try {
-      return DestinationModel.updateOne({ name: destination.name }, { $set: { viewedTimes: (destination.viewedTimes + 1) } });
+      return DestinationModel.updateOne({ name: name }, { $inc: { viewedTimes: 1 } });
     } catch (error) {
+      console.log(error);
+      console.log("--------------------------------------------------------------------------");
       throw new Error("An error occurred updating the password value");
     }
-  };
+  }
 
   static async getWeather(location) {
     try {
@@ -334,6 +325,29 @@ class DestinationService {
       throw new Error("Failed to inspect the weather");
     }
   }
+
+  static async addDestination(
+    name, description, activityList, longitude,
+    latitude, address, category, services, geotags,
+    contact, budget, workingHours, displayedDuration,
+    visitorsType, sheltered
+  ) {
+    try {
+      const location = { longitude, latitude, address }
+      const estimatedDuration = { displayedDuration };
+      const destination = new DestinationModel({
+        name, description, activityList, location, category, services, geotags,
+        contact, budget, workingHours, estimatedDuration,
+        visitorsType, sheltered
+      });
+      await destination.save();
+    } catch (error) {
+      console.log(error);
+      throw new Error("An error occurred adding the new destination");
+    }
+
+  }
+
 }
 
 

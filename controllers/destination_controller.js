@@ -11,21 +11,22 @@ exports.getRecommendedDestinations = async (req, res, next) => {
     console.log("------------------Get Recommended Destinations------------------");
     try {
         // verify token
-        const token = req.headers.authorization.split(' ')[1];
-        const touristData = await TouristService.getEmailFromToken(token);
-        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        // const token = req.headers.authorization.split(' ')[1];
+        // const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail("jenanahmad182@gmail.com");
         if (!tourist) {
             return res.status(500).json({ error: 'User does not exist' });
         }
-        var destinations = await DestinationService.getDestinations();
-        destinations.forEach(async destination => {
+        const destinations = await DestinationService.getDestinations();
+        const destinationsWithPoints = await Promise.all(destinations.map(async (destination) => {
             destination.points = await DestinationService.calculatePoints(tourist, destination);
-        });
-        const sortedDestinations = destinations.sort((a, b) => b.points - a.points);
-        // const recommendedDestinations = sortedDestinations.slice(0, 10);
+            return destination;
+        }));
+        const sortedDestinations = destinationsWithPoints.sort((a, b) => b.points - a.points);
         const recommendedData = sortedDestinations.map(destination => ({
-            name: destination.name, // Replace with the actual property name in your schema
-            image: destination.images.mainImage, // Replace with the actual property name in your schema
+            name: destination.name,
+            image: destination.images.mainImage,
+            points: destination.points,
         }));
         res.status(200).json(recommendedData);
     } catch (error) {
@@ -37,22 +38,24 @@ exports.getRecommendedDestinations = async (req, res, next) => {
 exports.getPopularDestinations = async (req, res, next) => {
     console.log("------------------Get Popular Destinations------------------");
     try {
-        //verify token
-        const token = req.headers.authorization.split(' ')[1];
-        const touristData = await TouristService.getEmailFromToken(token);
-        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        // verify token
+        // const token = req.headers.authorization.split(' ')[1];
+        // const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail("jenanahmad182@gmail.com");
         if (!tourist) {
             return res.status(500).json({ error: 'User does not exist' });
         }
-        var destinations = await DestinationService.getDestinations();
-        destinations.forEach(async destination => {
+        const destinations = await DestinationService.getDestinations();
+        const destinationsWithRatings = await Promise.all(destinations.map(async (destination) => {
             destination.points = await DestinationService.calculateRatings(destination);
-        });
-        const sortedDestinations = destinations.sort((a, b) => b.points - a.points);
-        // const recommendedDestinations = sortedDestinations.slice(0, 10);
+            console.log(destination.points);
+            return destination;
+        }));
+        const sortedDestinations = destinationsWithRatings.sort((a, b) => b.points - a.points);
         const popularData = sortedDestinations.map(destination => ({
-            name: destination.name, // Replace with the actual property name in your schema
-            image: destination.images.mainImage, // Replace with the actual property name in your schema
+            name: destination.name,
+            image: destination.images.mainImage,
+            points: destination.points,
         }));
         res.status(200).json(popularData);
     } catch (error) {
@@ -82,7 +85,7 @@ exports.getOtherDestinations = async (req, res, next) => {
         }));
         res.status(200).json(otherData);
     } catch (error) {
-        return res.status(500).json({ error: "Failed to other destinations" });
+        return res.status(500).json({ error: "Failed to get other destinations" });
     }
 };
 
@@ -91,9 +94,9 @@ exports.getDestinationDetails = async (req, res, next) => {
     //increment numofviewedtimes
     try {
         //verify token
-        const token = req.headers.authorization.split(' ')[1];
-        const touristData = await TouristService.getEmailFromToken(token);
-        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        // const token = req.headers.authorization.split(' ')[1];
+        // const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail("jenanahmad182@gmail.com");
         if (!tourist) {
             return res.status(500).json({ error: 'User does not exist' });
         }
@@ -125,7 +128,7 @@ exports.getDestinationDetails = async (req, res, next) => {
             OpeningTime: destination.openingTime, ClosingTime: destination.closingTime,
             WorkingDays: destination.workingdays, Weather: temperature,
             Rating: FRating, CostLevel: destination.budget, sheltered: destination.sheltered,
-            EstimatedTime: estimatedDuration.displayedDuration, Services: Services
+            EstimatedTime: destination.estimatedDuration.displayedDuration, Services: Services
         };
         const rating = { oneStar: oneStar, twoStars: twoStars, threeStars: threeStars, fourStars: fourStars, fiveStars: fiveStars };
         return res.status(200).json({ destinationImages: destinationImages, destinationDetails: destinationDetails, rating: rating })
@@ -344,6 +347,28 @@ exports.getComplaints = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Failed to retrieve location" });
+    }
+};
+
+exports.addDestination = async (req, res, next) => {
+    console.log("------------------Add Destination------------------");
+    try {
+        const { name, description, activityList, longitude,
+            latitude, address, category, services, geotags,
+            contact, budget, workingHours, displayedDuration,
+            visitorsType, sheltered } = req.body;
+        //this will be used to receive images
+        // upload.fields([{ name: 'discreteImage', maxCount: 1 }, { name: 'arrayOfImages' }]),
+        const destination = await DestinationService.addDestination(
+            name, description, activityList, longitude,
+            latitude, address, category, services, geotags,
+            contact, budget, workingHours, displayedDuration,
+            visitorsType, sheltered
+        )
+        return res.status(200).json({ message: "Destination added successfully" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to add destination" });
     }
 };
 

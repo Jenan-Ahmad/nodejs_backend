@@ -13,7 +13,7 @@ destinationRouter.post('/send-review-data', DestinationController.sendReviewData
 destinationRouter.post('/get-destination-lat-lng', DestinationController.getDestinationLatLng);
 destinationRouter.post('/send-complaint', DestinationController.addComplaint);
 destinationRouter.post('/get-complaints', DestinationController.getComplaints);
-
+destinationRouter.post('/add-destination', DestinationController.addDestination);
 
 destinationRouter.post('/get-weather', DestinationController.getWeather);
 module.exports = destinationRouter;

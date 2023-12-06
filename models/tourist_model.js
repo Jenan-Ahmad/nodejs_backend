@@ -86,6 +86,15 @@ const touristSchema = new mongoose.Schema({
     religiousLandmarks: {
       type: String,
     },
+    aquariums: {
+      type: String,
+    },
+    zoos: {
+      type: String,
+    },
+    others: {
+      type: String,
+    },
     Yes: {
       type: String,
     },

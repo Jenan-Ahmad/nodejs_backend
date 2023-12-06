@@ -86,4 +86,60 @@ exports.fetchPlanContents = async (req, res, next) => {
     }
 };
 
+exports.storePlan = async (req, res, next) => {
+    console.log("------------------Store Plan------------------");
+    try {
+        // const token = req.headers.authorization.split(' ')[1];
+        // const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail("jenanahmad182@gmail.com");
+        if (!tourist) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const touristCategories = await PlanService.getInterests(tourist);
+        const { destination, date, startTime, endTime, tripDuration, groupCount, ageCategories } = req.body;
+        const destinations = await DestinationService.getDestinationsInCity(destination);
+        const destinationsWithPoints = [];
+        for (const destination of destinations) {
+            destination.points = await DestinationService.calculatePoints(tourist, destination);
+            destination.points += await PlanService.calculatePlanPoints(destination, date, startTime, endTime, ageCategories);
+            destinationsWithPoints.push(destination);
+            console.log(destination.name, destination.points);
+        }
+        destinationsWithPoints.sort((a, b) => b.points - a.points);
+        const destinationsByCategory = await PlanService.segregateByCategory(destinationsWithPoints);
+        var planDestinations = await PlanService.initialPlan(destinationsByCategory, touristCategories);
+        var planDuration = await PlanService.getPlanDuration(planDestinations);
+        console.log("----------------------planduration", planDuration);
+        if (planDuration > tripDuration) {
+            planDestinations = await PlanService.reducePlan(planDuration, tripDuration, planDestinations, destinationsByCategory, touristCategories, startTime, endTime);
+        } else if (planDuration < tripDuration) {
+            //do this
+            console.log("----------------------------------------------less");
+            return res.status(200).json(planDestinations);
 
+            // planDuration = await PlanService.enlargePlan();
+            while (planDuration + 1 < tripDuration) {
+                console.log("----------------------------------------------less");
+                for (const category in destinationsByCategory) {
+                    if (!touristCategories.includes(category)) {
+                        const categoryArray = destinationsByCategory[category];
+                        if (categoryArray.length > 0) {
+                            const firstDestination = categoryArray[0];
+                            planDestinations.push(firstDestination);
+                            touristCategories.push(category);
+                            planDuration += firstDestination.estimatedDuration.displayedDuration;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        // const finalPlan = await
+        //need to make sure all places are visited when open, if not, shuffle the array, if theres still a problem
+        //swap
+        return res.status(200).json(planDestinations);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to fetch plan contents" });
+    }
+};

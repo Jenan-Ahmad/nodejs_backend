@@ -52,7 +52,7 @@ const destinationSchema = new mongoose.Schema({
             name: {
                 type: String,
             },
-        },
+        }
     ],
     reviews: [
         {
@@ -108,9 +108,7 @@ const destinationSchema = new mongoose.Schema({
         },
     },
     contact: {
-        email: {//admin's email
-            type: String,
-        },
+        type: String,
     },
     budget: {
         type: String,//based on front
@@ -148,6 +146,11 @@ const destinationSchema = new mongoose.Schema({
             type: String,
         },
     ],
+    ageCategory: [
+        {
+            type: String,
+        },
+    ],
     sheltered: {
         type: String,
     },
@@ -176,6 +179,9 @@ const destinationSchema = new mongoose.Schema({
             },
         }
     ],
+    addedBy: {
+        type: String,
+    },
 });
 
 const DestinationModel = db.model("destinations", destinationSchema);
