@@ -94,9 +94,9 @@ exports.getDestinationDetails = async (req, res, next) => {
     //increment numofviewedtimes
     try {
         //verify token
-        const token = req.headers.authorization.split(' ')[1];
-        const touristData = await TouristService.getEmailFromToken(token);
-        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        // const token = req.headers.authorization.split(' ')[1];
+        // const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail("jenanahmad182@gmail.com");
         if (!tourist) {
             return res.status(500).json({ error: 'User does not exist' });
         }
@@ -111,7 +111,10 @@ exports.getDestinationDetails = async (req, res, next) => {
         if (!incrDone) {
             return res.status(500).json({ error: 'Failed to load the destination' });
         }
-        const destinationImages = destination.images?.descriptiveImages;
+        // const destinationImages = destination.images?.descriptiveImages;
+        const destinationImages = destination.images.descriptiveImages.map(image => ({
+            image: image,
+        }));
         const weather = await DestinationService.getWeather(destination.location.address);
         const temperature = weather.match(/\d+/);
         const oneStar = destination.rating.oneStar;

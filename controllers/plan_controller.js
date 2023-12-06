@@ -111,13 +111,13 @@ exports.storePlan = async (req, res, next) => {
         var planDuration = await PlanService.getPlanDuration(planDestinations);
         console.log("----------------------planduration", planDuration);
         if (planDuration > tripDuration) {
-            planDestinations = await PlanService.reducePlan(planDuration, tripDuration, planDestinations, destinationsByCategory, touristCategories, startTime, endTime);
+            planDestinations = await PlanService.reducePlan(planDuration, tripDuration, planDestinations, destinationsByCategory, touristCategories, startTime);
         } else if (planDuration < tripDuration) {
             //do this
             console.log("----------------------------------------------less");
             return res.status(200).json(planDestinations);
 
-            // planDuration = await PlanService.enlargePlan();
+            planDuration = await PlanService.enlargePlan();
             while (planDuration + 1 < tripDuration) {
                 console.log("----------------------------------------------less");
                 for (const category in destinationsByCategory) {
