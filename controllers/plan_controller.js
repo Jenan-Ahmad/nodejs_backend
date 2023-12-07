@@ -118,6 +118,7 @@ exports.storePlan = async (req, res, next) => {
             console.log("----------------------------------------------less");
             planDestinations = await PlanService.enlargePlan(planDestinations, destinationsByCategory, touristCategories, startTime, endTime);
         }
+        
         return res.status(200).json(planDestinations);
     } catch (error) {
         console.log(error);

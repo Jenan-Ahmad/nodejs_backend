@@ -415,23 +415,29 @@ class PlanService {
                 }
             }
         }
-        // var destinations = lodash.shuffle(destinationsByCategory);
+        // destinationsByCategory = lodash.shuffle(destinationsByCategory);
+        const categoryNames = Object.keys(destinationsByCategory);
 
-        while (crntTime  < convertTimeStringToDate(endTime).getHours()) {
-            console.log("----------------------------------------------", crntTime);
-            for (const category in destinationsByCategory) {
-                console.log(destinationsByCategory[category].length);
-                for (let j = 0; j < destinationsByCategory[category].length; j++) {
-                    const solDestination = destinationsByCategory[category][j];
-                    if (planDestinations.includes(solDestination)) {
-                        continue;
-                    }
-                    if (crntTime >= convertTimeStringToDate(solDestination.workingHours.openingTime).getHours()
-                        && crntTime + solDestination.estimatedDuration.displayedDuration <= convertTimeStringToDate(solDestination.workingHours.closingTime).getHours()) {
-                        crntTime += solDestination.estimatedDuration.displayedDuration;
-                        planDestinations.push(solDestination);
-                    }
-
+        // Shuffle the category names
+        for (let i = categoryNames.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [categoryNames[i], categoryNames[j]] = [categoryNames[j], categoryNames[i]];
+        }
+        console.log("----------------------------------------------", crntTime);
+        for (const categoryName of categoryNames) {
+            console.log(destinationsByCategory[categoryName].length);
+            for (let j = 0; j < destinationsByCategory[categoryName].length; j++) {
+                const solDestination = destinationsByCategory[categoryName][j];
+                if (planDestinations.includes(solDestination)) {
+                    continue;
+                }
+                if (crntTime >= convertTimeStringToDate(solDestination.workingHours.openingTime).getHours()
+                    && crntTime + solDestination.estimatedDuration.displayedDuration <= convertTimeStringToDate(solDestination.workingHours.closingTime).getHours()) {
+                    crntTime += solDestination.estimatedDuration.displayedDuration;
+                    planDestinations.push(solDestination);
+                }
+                if (crntTime < convertTimeStringToDate(endTime).getHours()) {
+                    return planDestinations;
                 }
             }
         }

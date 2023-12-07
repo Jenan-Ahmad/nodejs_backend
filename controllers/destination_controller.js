@@ -255,7 +255,7 @@ exports.getDestinationLatLng = async (req, res, next) => {
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
-        return res.status(200).json({ latitude: destination.latitude, longitude: destination.longitude })
+        return res.status(200).json({ latitude: destination.location.latitude, longitude: destination.location.longitude })
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Failed to retrieve location" });
