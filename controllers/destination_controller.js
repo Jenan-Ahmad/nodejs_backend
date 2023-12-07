@@ -117,6 +117,7 @@ exports.getDestinationDetails = async (req, res, next) => {
         }));
         const weather = await DestinationService.getWeather(destination.location.address);
         const temperature = weather.match(/\d+/);
+        const weatherDescription = weather.match(/[a-zA-Z]+(?=\s*\+)/);
         const oneStar = destination.rating.oneStar;
         const twoStars = destination.rating.twoStars;
         const threeStars = destination.rating.threeStars;
@@ -129,7 +130,7 @@ exports.getDestinationDetails = async (req, res, next) => {
         const destinationDetails = {
             About: destination.description, Category: destination.category,
             OpeningTime: destination.workingHours.openingTime, ClosingTime: destination.workingHours.closingTime,
-            WorkingDays: destination.workingHours.workingdays, Weather: temperature,
+            WorkingDays: destination.workingHours.workingdays, Weather: temperature, WeatherDescription: weatherDescription,
             Rating: FRating, CostLevel: destination.budget, sheltered: destination.sheltered,
             EstimatedTime: destination.estimatedDuration.displayedDuration, Services: Services
         };
@@ -379,7 +380,8 @@ exports.addDestination = async (req, res, next) => {
 exports.getWeather = async (req, res, next) => {
     try {
         const data = await DestinationService.getWeather("ramallah");
-        res.json(data);
+        const words = data.match(/[a-zA-Z]+(?=\s*\+)/);
+        res.json(words);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

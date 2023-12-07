@@ -236,6 +236,9 @@ class PlanService {
                         const solDestination = destinationsByCategory[destination.category][j];
                         if (crntTime >= convertTimeStringToDate(solDestination.workingHours.openingTime).getHours()
                             && crntTime + solDestination.estimatedDuration.displayedDuration <= convertTimeStringToDate(solDestination.workingHours.closingTime).getHours()) {
+                            if (planDestinations.includes(solDestination)) {
+                                continue;
+                            }
                             planDestinations[i] = solDestination;
                             console.log("Alter, from category, Destination", solDestination.name, "is saved");
                             solved = 1;
@@ -303,7 +306,7 @@ class PlanService {
         return planDestinations;
     }
 
-    static async enlargePlan(planDuration, tripDuration, planDestinations, destinationsByCategory, touristCategories, startTime, endTime) {
+    static async enlargePlan(planDestinations, destinationsByCategory, touristCategories, startTime, endTime) {
         console.log("-------------------------------enlarge plan");
         var crntTime = convertTimeStringToDate(startTime).getHours();//holds time scrolling through plan destinations
         //shuffle places
@@ -345,6 +348,9 @@ class PlanService {
                         const solDestination = destinationsByCategory[destination.category][j];
                         if (crntTime >= convertTimeStringToDate(solDestination.workingHours.openingTime).getHours()
                             && crntTime + solDestination.estimatedDuration.displayedDuration <= convertTimeStringToDate(solDestination.workingHours.closingTime).getHours()) {
+                            if (planDestinations.includes(solDestination)) {
+                                continue;
+                            }
                             planDestinations[i] = solDestination;
                             console.log("Alter, from category, Destination", solDestination.name, "is saved");
                             solved = 1;
@@ -409,11 +415,27 @@ class PlanService {
                 }
             }
         }
-        //get amount of left time
-        var leftTime = convertTimeStringToDate(endTime) - crntTime;
-        
-        return planDestinations;
+        // var destinations = lodash.shuffle(destinationsByCategory);
 
+        while (crntTime  < convertTimeStringToDate(endTime).getHours()) {
+            console.log("----------------------------------------------", crntTime);
+            for (const category in destinationsByCategory) {
+                console.log(destinationsByCategory[category].length);
+                for (let j = 0; j < destinationsByCategory[category].length; j++) {
+                    const solDestination = destinationsByCategory[category][j];
+                    if (planDestinations.includes(solDestination)) {
+                        continue;
+                    }
+                    if (crntTime >= convertTimeStringToDate(solDestination.workingHours.openingTime).getHours()
+                        && crntTime + solDestination.estimatedDuration.displayedDuration <= convertTimeStringToDate(solDestination.workingHours.closingTime).getHours()) {
+                        crntTime += solDestination.estimatedDuration.displayedDuration;
+                        planDestinations.push(solDestination);
+                    }
+
+                }
+            }
+        }
+        return planDestinations;
     }
 }
 

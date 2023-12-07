@@ -116,7 +116,7 @@ exports.storePlan = async (req, res, next) => {
         } else if (planDuration < tripDuration) {
             //do this
             console.log("----------------------------------------------less");
-            planDuration = await PlanService.enlargePlan();
+            planDestinations = await PlanService.enlargePlan(planDestinations, destinationsByCategory, touristCategories, startTime, endTime);
         }
         return res.status(200).json(planDestinations);
     } catch (error) {
