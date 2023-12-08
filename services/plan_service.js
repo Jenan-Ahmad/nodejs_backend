@@ -183,6 +183,10 @@ class PlanService {
         var planDuration = 0;
         for (const destination of planDestinations) {
             console.log("--------------------------", destination.name);
+            if (destination.name === "break") {
+                planDuration++;
+                continue;
+            }
             planDuration += destination.estimatedDuration.displayedDuration;
         }
         return planDuration;
@@ -298,7 +302,7 @@ class PlanService {
                 }
                 if (solved === 0) {
                     planDestinations[i] = null;
-                    planDestinations[i] = { name: "break;", time: 1 };
+                    planDestinations[i] = { name: "break", time: 1 };
                     crntTime += 1;
                 }
             }
@@ -410,7 +414,7 @@ class PlanService {
                 }
                 if (solved === 0) {
                     planDestinations[i] = null;
-                    planDestinations[i] = { name: "break;", time: 1 };
+                    planDestinations[i] = { name: "break", time: 1 };
                     crntTime += 1;
                 }
             }
@@ -443,6 +447,18 @@ class PlanService {
         }
         return planDestinations;
     }
+
+    static async getCityImage(city) {
+        switch (city.toLowerCase()) {
+            case "ramallah":
+                return "https://firebasestorage.googleapis.com/v0/b/touristine-9a51a.appspot.com/o/cities%2Framallah.jpeg?alt=media&token=c0477916-b960-401a-ab9f-6908cd1c5588";
+        }
+    }
+
+    static async getHour(time) {
+        return convertTimeStringToDate(time).getHours();
+    }
+
 }
 
 module.exports = PlanService;  

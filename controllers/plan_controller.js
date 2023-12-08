@@ -89,9 +89,9 @@ exports.fetchPlanContents = async (req, res, next) => {
 exports.storePlan = async (req, res, next) => {
     console.log("------------------Store Plan------------------");
     try {
-        // const token = req.headers.authorization.split(' ')[1];
-        // const touristData = await TouristService.getEmailFromToken(token);
-        const tourist = await TouristService.getTouristByEmail("jenanahmad182@gmail.com");
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
         if (!tourist) {
             return res.status(500).json({ error: 'User does not exist' });
         }
@@ -118,8 +118,45 @@ exports.storePlan = async (req, res, next) => {
             console.log("----------------------------------------------less");
             planDestinations = await PlanService.enlargePlan(planDestinations, destinationsByCategory, touristCategories, startTime, endTime);
         }
-        
-        return res.status(200).json(planDestinations);
+        const cityImage = await PlanService.getCityImage(destination);
+        const planDescription = {
+            planID: 33, destName: destination,
+            numOfPlaces: planDestinations.length, totalTime: await PlanService.getPlanDuration(planDestinations),
+            startTime: startTime, endTime: endTime, imagePath: cityImage, date: date
+        }
+        const planContents = [];
+        var crntTime = await PlanService.getHour(startTime);
+        for (const place of planDestinations) {
+            if (place.name === "break") {
+                const planItem = {
+                    placeName: "Break",
+                    startTime: `${crntTime < 10 ? '0' : ''}${crntTime}:00`,
+                    endTime: `${crntTime + 1 < 10 ? '0' : ''}${crntTime + 1}:00`,
+                    activityList: {
+                        title: "Nature Walk",
+                        description: "Discover hidden gems, street art, and unique local shops.",
+                    },
+                    imagePath: "https://firebasestorage.googleapis.com/v0/b/touristine-9a51a.appspot.com/o/cities%2Fgrey%20vertical.png?alt=media&token=35e04e30-fbba-43ab-9269-d201c53c3bfe",
+                    latitude: "0",
+                    longitude: "0",
+                }
+                crntTime++;
+                planContents.push(planItem);
+            } else {
+                const planItem = {
+                    placeName: place.name,
+                    startTime: `${crntTime < 10 ? '0' : ''}${crntTime}:00`,
+                    endTime: `${crntTime + place.estimatedDuration.displayedDuration < 10 ? '0' : ''}${crntTime + place.estimatedDuration.displayedDuration}:00`,
+                    activityList: place.activityList,
+                    imagePath: place.images.mainImage,
+                    latitude: place.location.latitude,
+                    longitude: place.location.longitude,
+                }
+                crntTime += place.estimatedDuration.displayedDuration;
+                planContents.push(planItem);
+            }
+        }
+        return res.status(200).json({ planDescription, planContents });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Failed to fetch plan contents" });
