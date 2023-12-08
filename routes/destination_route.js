@@ -14,6 +14,8 @@ destinationRouter.post('/get-destination-lat-lng', DestinationController.getDest
 destinationRouter.post('/send-complaint', DestinationController.addComplaint);
 destinationRouter.post('/get-complaints', DestinationController.getComplaints);
 destinationRouter.post('/add-destination', DestinationController.addDestination);
+destinationRouter.post('/upload-images', DestinationController.uploadImages);
+
 
 destinationRouter.post('/get-weather', DestinationController.getWeather);
 module.exports = destinationRouter;

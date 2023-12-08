@@ -97,8 +97,8 @@ class PlanService {
             console.log("day is bad");
         }
         console.log("check if age is convenient----------------------")
-        const ageInCommon = findCommonElements(destination.ageCategory, ageCategories);
-        points += ageInCommon * 30;
+        // const ageInCommon = findCommonElements(destination.ageCategory, ageCategories);
+        // points += ageInCommon * 30;
         return points;
     }
 

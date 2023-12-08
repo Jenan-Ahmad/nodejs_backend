@@ -376,6 +376,10 @@ exports.addDestination = async (req, res, next) => {
     }
 };
 
+exports.uploadImages = async (req, res, next) => {
+
+};
+
 //might be deleted
 exports.getWeather = async (req, res, next) => {
     try {
