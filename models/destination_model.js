@@ -40,7 +40,22 @@ const destinationSchema = new mongoose.Schema({
         ],
         pendingImages: [
             {
-                type: String
+                email: {
+                    type: String,
+                },
+                date: {
+                    type: String,
+                },
+                keywords: [
+                    {
+                        type: String,
+                    },
+                ],
+                images: [
+                    {
+                        type: String,
+                    },
+                ],
             },
         ],
     },

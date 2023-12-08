@@ -107,9 +107,9 @@ exports.fetchPlanContents = async (req, res, next) => {
 exports.storePlan = async (req, res, next) => {
     console.log("------------------Store Plan------------------");
     try {
-        const token = req.headers.authorization.split(' ')[1];
-        const touristData = await TouristService.getEmailFromToken(token);
-        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        // const token = req.headers.authorization.split(' ')[1];
+        // const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail("jenanahmad182@gmail.com");
         if (!tourist) {
             return res.status(500).json({ error: 'User does not exist' });
         }

@@ -417,6 +417,9 @@ class PlanService {
             [categoryNames[i], categoryNames[j]] = [categoryNames[j], categoryNames[i]];
         }
         console.log("----------------------------------------------", crntTime);
+        if (crntTime > convertTimeStringToDate(endTime).getHours() + 1) {
+            return planDestinations;
+        }
         for (const categoryName of categoryNames) {
             console.log(destinationsByCategory[categoryName].length);
             for (let j = 0; j < destinationsByCategory[categoryName].length; j++) {
@@ -426,10 +429,13 @@ class PlanService {
                 }
                 if (crntTime >= convertTimeStringToDate(solDestination.workingHours.openingTime).getHours()
                     && crntTime + solDestination.estimatedDuration.displayedDuration <= convertTimeStringToDate(solDestination.workingHours.closingTime).getHours()) {
+                    if (crntTime + solDestination.estimatedDuration.displayedDuration > convertTimeStringToDate(endTime).getHours() + 1) {
+                        return planDestinations;
+                    }
                     crntTime += solDestination.estimatedDuration.displayedDuration;
                     planDestinations.push(solDestination);
                 }
-                if (crntTime < convertTimeStringToDate(endTime).getHours()) {
+                if (crntTime > convertTimeStringToDate(endTime).getHours() + 1) {
                     return planDestinations;
                 }
             }

@@ -110,6 +110,23 @@ class DestinationService {
     }
   }
 
+  static async uploadImages(destination, email, date, imageUrls, keywords) {
+    try {
+      return DestinationModel.updateOne(
+        { name: destination.name },
+        {
+          $push: {
+            pendingImages: {
+              email: email, data: date, images: imageUrls, keywords: keywords
+            }
+          }
+        }
+      );
+    } catch (error) {
+      throw new Error("An error occurred updating your review");
+    }
+  }
+
   static async calculatePoints(tourist, destination) {
     console.log("calculating points-------------------");
     try {
