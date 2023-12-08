@@ -81,6 +81,8 @@ exports.fetchPlanContents = async (req, res, next) => {
                         description: "Discover hidden gems, street art, and unique local shops.",
                     },
                     imagePath: "https://firebasestorage.googleapis.com/v0/b/touristine-9a51a.appspot.com/o/cities%2Fgrey%20vertical.png?alt=media&token=35e04e30-fbba-43ab-9269-d201c53c3bfe",
+                    latitude: "0",
+                    longitude: "0"
                 };
             } else {
                 const destinationData = await DestinationService.getDestinationByName(destination.destination);
@@ -89,7 +91,9 @@ exports.fetchPlanContents = async (req, res, next) => {
                     startTime: destination.startTime,
                     endTime: destination.endTime,
                     activityList: destinationData.activityList,
-                    imagePath: destinationData.images.mainImage
+                    imagePath: destinationData.images.mainImage,
+                    latitude: destinationData.location.latitude,
+                    longitude: destinationData.location.longitude
                 };
             }
         }));
