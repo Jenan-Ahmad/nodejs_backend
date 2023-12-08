@@ -71,41 +71,39 @@ class DestinationService {
     try {
       switch (oldRating) {
         case 1:
-          DestinationModel.updateOne({ name: destination.name }, { $set: { oneStar: (destination.oneStar - 1) } });
+          await DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.oneStar': -1 } });
           break;
         case 2:
-          DestinationModel.updateOne({ name: destination.name }, { $set: { twoStars: (destination.twoStars - 1) } });
+          await DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.twoStars': -1 } });
           break;
         case 3:
-          DestinationModel.updateOne({ name: destination.name }, { $set: { threeStars: (destination.threeStars - 1) } });
+          await DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.threeStars': -1 } });
           break;
         case 4:
-          DestinationModel.updateOne({ name: destination.name }, { $set: { fourStars: (destination.fourStars - 1) } });
+          await DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.fourStars': -1 } });
           break;
-        case 5: DestinationModel.updateOne({ name: destination.name }, { $set: { fiveStars: (destination.fiveStars - 1) } });
+        case 5:
+          await DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.fiveStars': -1 } });
           break;
         default:
           break;
       }
       switch (newRating) {
         case 1:
-          DestinationModel.updateOne({ name: destination.name }, { $set: { oneStar: (destination.oneStar + 1) } });
-          break;
+          return DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.oneStar': 1 } });
         case 2:
-          DestinationModel.updateOne({ name: destination.name }, { $set: { twoStars: (destination.twoStars + 1) } });
-          break;
+          return DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.twoStars': 1 } });
         case 3:
-          DestinationModel.updateOne({ name: destination.name }, { $set: { threeStars: (destination.threeStars + 1) } });
-          break;
+          return DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.threeStars': 1 } });
         case 4:
-          DestinationModel.updateOne({ name: destination.name }, { $set: { fourStars: (destination.fourStars + 1) } });
-          break;
-        case 5: DestinationModel.updateOne({ name: destination.name }, { $set: { fiveStars: (destination.fiveStars + 1) } });
-          break;
+          return DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.fourStars': 1 } });
+        case 5:
+          return DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.fiveStars': 1 } });
         default:
           break;
       }
     } catch (error) {
+      console.log(error);
       throw new Error("An error occurred updating the ratings");
     }
   }

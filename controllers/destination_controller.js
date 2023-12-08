@@ -220,17 +220,28 @@ exports.sendReviewData = async (req, res, next) => {
         const foundReview = destination.reviews.find(review => review.user.email === tourist.email);
         if (foundReview) {
             console.log("Review found:", foundReview.feedback);
+            const oldRating = foundReview.stars;
+            const newRating = stars;
             const updated = await DestinationService.updateReview(tourist.email, destination, stars, title, content, date);
             if (!updated) {
                 return res.status(500).json({ error: "Couldn\'t update your review" });
             }
-            // const updateRating = 
+            const updateRating = await DestinationService.updateRating(destination, newRating, oldRating);
+            if (!updateRating) {
+                return res.status(500).json({ error: "Couldn\'t update your rating" });
+            }
             return res.status(200).json({ message: "Your review was updated" });
         } else {
             console.log("Review not found for user:");
+            const oldRating = -100;
+            const newRating = stars;
             const updated = await DestinationService.saveReview(tourist, destination, stars, title, content, date);
             if (!updated) {
                 return res.status(500).json({ message: "Couldn\'t update your review" });
+            }
+            const updateRating = await DestinationService.updateRating(destination, newRating, oldRating);
+            if (!updateRating) {
+                return res.status(500).json({ error: "Couldn\'t update your rating" });
             }
             return res.status(200).json({ message: "Your review was saved" });
         }
