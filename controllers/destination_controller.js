@@ -224,6 +224,7 @@ exports.sendReviewData = async (req, res, next) => {
             if (!updated) {
                 return res.status(500).json({ error: "Couldn\'t update your review" });
             }
+            // const updateRating = 
             return res.status(200).json({ message: "Your review was updated" });
         } else {
             console.log("Review not found for user:");
@@ -233,7 +234,6 @@ exports.sendReviewData = async (req, res, next) => {
             }
             return res.status(200).json({ message: "Your review was saved" });
         }
-
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Failed to save your review" });

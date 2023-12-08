@@ -111,6 +111,8 @@ exports.storePlan = async (req, res, next) => {
         }
         const touristCategories = await PlanService.getInterests(tourist);
         const { destination, date, startTime, endTime, tripDuration, groupCount, ageCategories } = req.body;
+        const match = tripDuration.match(/\b\d+\b/);
+        const extractedNumber = match ? parseInt(match[0]) : null;
         const destinations = await DestinationService.getDestinationsInCity(destination);
         const destinationsWithPoints = [];
         for (const destination of destinations) {
@@ -124,10 +126,10 @@ exports.storePlan = async (req, res, next) => {
         var planDestinations = await PlanService.initialPlan(destinationsByCategory, touristCategories);
         var planDuration = await PlanService.getPlanDuration(planDestinations);
         console.log("----------------------planduration", planDuration);
-        if (planDuration > tripDuration) {
+        if (planDuration > extractedNumber) {
             console.log("----------------------------------------------more");
-            planDestinations = await PlanService.reducePlan(planDuration, tripDuration, planDestinations, destinationsByCategory, touristCategories, startTime);
-        } else if (planDuration < tripDuration) {
+            planDestinations = await PlanService.reducePlan(planDuration, extractedNumber, planDestinations, destinationsByCategory, touristCategories, startTime);
+        } else if (planDuration < extractedNumber) {
             //do this
             console.log("----------------------------------------------less");
             planDestinations = await PlanService.enlargePlan(planDestinations, destinationsByCategory, touristCategories, startTime, endTime);
