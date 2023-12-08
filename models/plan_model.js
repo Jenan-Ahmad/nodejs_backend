@@ -37,21 +37,7 @@ const planSchema = new mongoose.Schema({
     endTime: {
         type: String,
     },
-    image: {
-        type: String,
-    },
     date: {
-        type: String,
-    },
-    budget: {
-        type: String,
-    },
-    categories: [
-        {
-            type: String,
-        }
-    ],
-    vtype: {
         type: String,
     },
 });

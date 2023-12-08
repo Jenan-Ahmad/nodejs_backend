@@ -31,17 +31,6 @@ function convertTimeStringToDate(timeString) {
     return date;
 }
 
-function replaceFromCategory(category, destinationsByCategory, crntTime, startTime, endTime) {
-    for (const solDest in destinationsByCategory[category]) {
-        if (crntTime >= convertTimeStringToDate(destinationsByCategory[category][solDest].workingHours.openingTime).getHours()
-            && crntTime + destinationsByCategory[category][solDest].estimatedDuration.displayedDuration <= convertTimeStringToDate(destinationsByCategory[category][solDest].workingHours.closingTime).getHours() + 1) {
-            destination = destinationsByCategory[category][solDest];
-            updated = 1;
-            break;
-        }
-    }
-}
-
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -107,9 +96,9 @@ class PlanService {
             points -= 1000;
             console.log("day is bad");
         }
-        // console.log("check if age is convenient----------------------")
-        // const ageInCommon = findCommonElements(destination.ageCategories, ageCategories);
-        // points += ageInCommon * 30;
+        console.log("check if age is convenient----------------------")
+        const ageInCommon = findCommonElements(destination.ageCategory, ageCategories);
+        points += ageInCommon * 30;
         return points;
     }
 
@@ -457,6 +446,28 @@ class PlanService {
 
     static async getHour(time) {
         return convertTimeStringToDate(time).getHours();
+    }
+
+    static async storePlan(email, planDestinations, city, image, totalTime, startTime, endTime, date) {
+        try {
+            const destinations = [];
+            for (const place of planDestinations) {
+                const planItem = {
+                    destination: place.placeName,
+                    startTime: place.startTime,
+                    endTime: place.endTime
+                };
+                destinations.push(planItem);
+            }
+            const plan = new PlanModel({
+                email, destinations, city, image, totalTime, startTime, endTime, date
+            });
+            await plan.save();
+            return plan._id;
+        } catch (error) {
+            console.log(error);
+            throw new Error("An error occurred creating the plan");
+        }
     }
 
 }

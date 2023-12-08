@@ -20,6 +20,7 @@ exports.getPlans = async (req, res, next) => {
         var fullPlans = await PlanService.getPlans(tourist.email);
         const plans = fullPlans.map(plan => ({
             planId: plan._id,
+            destination: plan.city,
             numOfPlaces: plan.destinations.length,
             totalTime: plan.totalTime,
             startTime: plan.startTime,
@@ -70,14 +71,27 @@ exports.fetchPlanContents = async (req, res, next) => {
             return res.status(500).json({ error: 'Plan does not exist' });
         }
         const planData = await Promise.all(plan.destinations.map(async destination => {
-            const destinationData = await DestinationService.getDestinationByName(destination.destination);
-            return {
-                placeName: destination.destination,
-                startTime: destination.startTime,
-                endTime: destination.endTime,
-                activityList: destinationData.activityList,
-                imagePath: destinationData.images.mainImage
-            };
+            if (destination.destination === "break") {
+                return {
+                    placeName: "break",
+                    startTime: destination.startTime,
+                    endTime: destination.endTime,
+                    activityList: {
+                        title: "Nature Walk",
+                        description: "Discover hidden gems, street art, and unique local shops.",
+                    },
+                    imagePath: "https://firebasestorage.googleapis.com/v0/b/touristine-9a51a.appspot.com/o/cities%2Fgrey%20vertical.png?alt=media&token=35e04e30-fbba-43ab-9269-d201c53c3bfe",
+                };
+            } else {
+                const destinationData = await DestinationService.getDestinationByName(destination.destination);
+                return {
+                    placeName: destination.destination,
+                    startTime: destination.startTime,
+                    endTime: destination.endTime,
+                    activityList: destinationData.activityList,
+                    imagePath: destinationData.images.mainImage
+                };
+            }
         }));
         return res.status(200).json({ planData });
     } catch (error) {
@@ -119,11 +133,7 @@ exports.storePlan = async (req, res, next) => {
             planDestinations = await PlanService.enlargePlan(planDestinations, destinationsByCategory, touristCategories, startTime, endTime);
         }
         const cityImage = await PlanService.getCityImage(destination);
-        const planDescription = {
-            planID: 33, destName: destination,
-            numOfPlaces: planDestinations.length, totalTime: await PlanService.getPlanDuration(planDestinations),
-            startTime: startTime, endTime: endTime, imagePath: cityImage, date: date
-        }
+
         const planContents = [];
         var crntTime = await PlanService.getHour(startTime);
         for (const place of planDestinations) {
@@ -139,7 +149,7 @@ exports.storePlan = async (req, res, next) => {
                     imagePath: "https://firebasestorage.googleapis.com/v0/b/touristine-9a51a.appspot.com/o/cities%2Fgrey%20vertical.png?alt=media&token=35e04e30-fbba-43ab-9269-d201c53c3bfe",
                     latitude: "0",
                     longitude: "0",
-                }
+                };
                 crntTime++;
                 planContents.push(planItem);
             } else {
@@ -151,14 +161,25 @@ exports.storePlan = async (req, res, next) => {
                     imagePath: place.images.mainImage,
                     latitude: place.location.latitude,
                     longitude: place.location.longitude,
-                }
+                };
                 crntTime += place.estimatedDuration.displayedDuration;
                 planContents.push(planItem);
             }
         }
+        const totalTime = crntTime - await PlanService.getHour(startTime);
+        const addPlan = await PlanService.storePlan(
+            tourist.email, planContents,
+            destination, cityImage, totalTime,
+            startTime, `${crntTime < 10 ? '0' : ''}${crntTime}:00`,
+            date);
+        const planDescription = {
+            planID: addPlan, destName: destination,
+            numOfPlaces: planDestinations.length, totalTime: await PlanService.getPlanDuration(planDestinations),
+            startTime: startTime, endTime: `${crntTime < 10 ? '0' : ''}${crntTime}:00`, imagePath: cityImage, date: date
+        }
         return res.status(200).json({ planDescription, planContents });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ error: "Failed to fetch plan contents" });
+        return res.status(500).json({ error: "Failed to create a plan" });
     }
 };
