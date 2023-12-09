@@ -447,9 +447,9 @@ exports.uploadImages = async (req, res, next) => {
 exports.getUploadedImages = async (req, res, next) => {
     console.log("------------------Get Uploaded Images------------------");
     try {
-        const token = req.headers.authorization.split(' ')[1];
-        const touristData = await TouristService.getEmailFromToken(token);
-        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        // const token = req.headers.authorization.split(' ')[1];
+        // const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail("israa.k.odeh@gmail.com");
         const { destinationName } = req.body;
         const destination = await DestinationService.getDestinationByName(destinationName);
         if (!destination) {

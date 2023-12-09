@@ -115,7 +115,7 @@ class DestinationService {
         {
           $push: {
             'images.pendingImages': {
-              email: email, data: date, images: imageUrls, keywords: keywords, status: "Pending"
+              email: email, date: date, images: imageUrls, keywords: keywords, status: "Pending"
             }
           }
         }
