@@ -17,7 +17,18 @@ exports.storeDestination = async (req, res, next) => {
             if (!tourist) {
                 return res.status(500).json({ error: 'User does not exist' });
             }
-            const { date, destinationName, category, budget, timeToSpend, sheltered, about } = req.body
+            const { date, destinationName, category, budget, timeToSpend, sheltered, about, city } = req.body
+            const match = timeToSpend.match(/\b\d+\b/);
+            const extractedNumber = match ? parseInt(match[0]) : null;
+            if (!req.files || req.files.length === 0) {
+                console.log("no image");
+                const update = await SuggestionService.addSuggestion(date, destinationName, category, budget, extractedNumber, sheltered, about, [], tourist.email, city);
+                if (!update) {
+                    console.log("Failed to add the destination");
+                    throw new Error("Failed to add the destination");
+                }
+                return res.status(200).json("The destination was added successfully");
+            }
             const imageUrls = [];
             for (const file of req.files) {
                 await new Promise((resolve, reject) => {
@@ -48,7 +59,7 @@ exports.storeDestination = async (req, res, next) => {
                     blobStream.end(file.buffer);
                 });
             }
-            const update = await SuggestionService.addSuggestion(date, destinationName, category, budget, timeToSpend, sheltered, about, imageUrls, tourist.email);
+            const update = await SuggestionService.addSuggestion(date, destinationName, category, budget, extractedNumber, sheltered, about, imageUrls, tourist.email, city);
             if (!update) {
                 console.log("Failed to add the destination");
                 throw new Error("Failed to add the destination");
@@ -58,5 +69,55 @@ exports.storeDestination = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Failed to add the destination" });
+    }
+};
+
+exports.getUploadedDests = async (req, res, next) => {
+    console.log("------------------Get Uploaded Dests------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        if (!tourist) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const destinationsList = await SuggestionService.getDestinationsByEmail(tourist.email);
+        const destinations = destinationsList.map(destination => ({
+            destID: destination._id,
+            date: destination.date,
+            destinationName: destination.name,
+            category: destination.category,
+            budget: destination.budget,
+            timeToSpend: destination.estimatedDuration,
+            sheltered: destination.sheltered,
+            status: destination.status,
+            about: destination.about,
+            imagesURLs: destination.images,
+        }));
+        res.status(200).json(destinations);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to retrieve the destinations" });
+    }
+};
+
+exports.deleteDestination = async (req, res, next) => {
+    console.log("------------------Delete Destinations------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        if (!tourist) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const destId = req.params.destId;
+        const deleted = await SuggestionService.deleteSuggestion(destId);
+        if (!deleted) {
+            return res.status(404).json({ error: 'Destination was not found' });
+        }
+        return res.status(200).json({ message: "The Destination was deleted" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to delete the destination" });
     }
 };
