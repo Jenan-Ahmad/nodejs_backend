@@ -3,6 +3,7 @@ const db = require('./config/db')
 const touristRouter = require('./routes/tourist_route');
 const destinationRouter = require('./routes/destination_route');
 const planRouter = require('./routes/plan_route');
+const suggestionRouter = require('./routes/suggestion_route');
 
 const port = 3000;
 

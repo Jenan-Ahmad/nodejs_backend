@@ -444,6 +444,52 @@ exports.uploadImages = async (req, res, next) => {
     }
 };
 
+exports.getUploadedImages = async (req, res, next) => {
+    console.log("------------------Get Uploaded Images------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        const { destinationName } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const uploadedImages = destination.images.pendingImages.find(uploadedImage => uploadedImage.email === tourist.email);
+        if (uploadedImages) {
+            return res.status(200).json({ uploadedImages });
+        } else {
+            console.log("Images not found for user");
+            return res.status(404).json({ message: "Uploaded images list is empty" });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to retrieve your images" });
+    }
+};
+
+exports.deleteUploadedImages = async (req, res, next) => {
+    console.log("------------------Delete Uploaded Images------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        const uploadedImagesId = req.params.uploadedImagesId;
+        const { destinationName } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const deleteUploadedImages = await DestinationService.deleteUploadedImages(destination, uploadedImagesId);
+        if (!deleteUploadedImages) {
+            return res.status(500).json({ error: "Failed to delete your images" });
+        }
+        return res.status(200).json({ message: "The images were deleted successfully" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to delete your images" });
+    }
+};
 //might be deleted
 exports.getWeather = async (req, res, next) => {
     try {

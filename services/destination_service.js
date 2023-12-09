@@ -115,7 +115,7 @@ class DestinationService {
         {
           $push: {
             pendingImages: {
-              email: email, data: date, images: imageUrls, keywords: keywords
+              email: email, data: date, images: imageUrls, keywords: keywords, status: "Pending"
             }
           }
         }
@@ -339,6 +339,12 @@ class DestinationService {
       console.log("Error occurred inspecting the weather");
       throw new Error("Failed to inspect the weather");
     }
+  }
+
+  static async deleteUploadedImages(destination, uploadedImagesId) {
+    return await DestinationModel.updateOne(
+      { name: destination.name }, { $pull: { 'images.pendingImages': { _id: uploadedImagesId } } }
+    );
   }
 
   static async addDestination(
