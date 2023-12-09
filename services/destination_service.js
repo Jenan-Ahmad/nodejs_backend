@@ -309,7 +309,7 @@ class DestinationService {
         {
           $push: {
             complaints: {
-              email: email, date: date, title: title, complaint: complaint, images: images
+              email: email, date: date, title: title, complaint: complaint, images: images, seen: "false"
             }
           }
         }

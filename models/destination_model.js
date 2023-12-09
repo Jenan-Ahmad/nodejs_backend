@@ -192,6 +192,9 @@ const destinationSchema = new mongoose.Schema({
             complaint: {
                 type: String,
             },
+            seen: {
+                type: String
+            }
         }
     ],
     addedBy: {
