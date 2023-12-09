@@ -277,7 +277,6 @@ exports.addComplaint = async (req, res, next) => {
     console.log("------------------Add Complaint------------------");
     try {
         upload.array('images')(req, res, async (err) => {
-            // //verify token
             const token = req.headers.authorization.split(' ')[1];
             const touristData = await TouristService.getEmailFromToken(token);
             const tourist = await TouristService.getTouristByEmail(touristData.email);
@@ -291,7 +290,7 @@ exports.addComplaint = async (req, res, next) => {
             }
             if (!req.files || req.files.length === 0) {
                 console.log("no image");
-                const update = await DestinationService.addComplaint(destination, tourist.email, title, content, date, null);
+                const update = await DestinationService.addComplaint(destination, tourist.email, title, content, date, []);
                 if (!update) {
                     console.log("failed to add complaint with no images");
                     throw new Error("Faield to add your complaint");
