@@ -221,8 +221,8 @@ exports.sendReviewData = async (req, res, next) => {
         if (foundReview) {
             console.log("Review found:", foundReview.feedback);
             const oldRating = foundReview.stars;
-            const newRating = stars;
-            const updated = await DestinationService.updateReview(tourist.email, destination, stars, title, content, date);
+            const newRating = parseInt(stars, 10);
+            const updated = await DestinationService.updateReview(tourist.email, destination, parseInt(stars, 10), title, content, date);
             if (!updated) {
                 return res.status(500).json({ error: "Couldn\'t update your review" });
             }
@@ -234,8 +234,8 @@ exports.sendReviewData = async (req, res, next) => {
         } else {
             console.log("Review not found for user:");
             const oldRating = -100;
-            const newRating = stars;
-            const updated = await DestinationService.saveReview(tourist, destination, stars, title, content, date);
+            const newRating = parseInt(stars, 10);
+            const updated = await DestinationService.saveReview(tourist, destination, parseInt(stars, 10), title, content, date);
             if (!updated) {
                 return res.status(500).json({ message: "Couldn\'t update your review" });
             }
