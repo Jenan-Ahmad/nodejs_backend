@@ -447,15 +447,15 @@ exports.uploadImages = async (req, res, next) => {
 exports.getUploadedImages = async (req, res, next) => {
     console.log("------------------Get Uploaded Images------------------");
     try {
-        // const token = req.headers.authorization.split(' ')[1];
-        // const touristData = await TouristService.getEmailFromToken(token);
-        const tourist = await TouristService.getTouristByEmail("israa.k.odeh@gmail.com");
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
         const { destinationName } = req.body;
         const destination = await DestinationService.getDestinationByName(destinationName);
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
-        const uploadedImages = destination.images.pendingImages.find(uploadedImage => uploadedImage.email === tourist.email);
+        const uploadedImages = destination.images.pendingImages.filter(uploadedImage => uploadedImage.email === tourist.email);
         if (uploadedImages) {
             return res.status(200).json({ uploadedImages });
         } else {
