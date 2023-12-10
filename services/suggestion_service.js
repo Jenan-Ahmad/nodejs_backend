@@ -16,7 +16,7 @@ class SuggestionService {
 
     static async addSuggestion(date, name, category, budget, estimatedDuration, sheltered, about, images, email, city) {
         try {
-            const status = "unseen";
+            const status = "Unseen";
             const suggestion = new SuggestionModel({ date, name, about, images, category, budget, estimatedDuration, sheltered, email, city, status });
             return await suggestion.save();
         } catch (error) {

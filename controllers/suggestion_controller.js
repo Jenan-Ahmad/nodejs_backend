@@ -93,6 +93,8 @@ exports.getUploadedDests = async (req, res, next) => {
             status: destination.status,
             about: destination.about,
             imagesURLs: destination.images,
+            city: destination.city,
+            adminComment: destination.comment.reply,
         }));
         res.status(200).json(destinations);
     } catch (error) {
