@@ -490,6 +490,27 @@ exports.deleteUploadedImages = async (req, res, next) => {
         return res.status(500).json({ error: "Failed to delete your images" });
     }
 };
+
+exports.searchDestination = async (req, res, next) => {
+    console.log("------------------Search Destination------------------");
+    try {
+        console.log(req.body);
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        const { searchTerm, isBudgetFriendly, isMidRange, isLuxurious, Sheltered } = req.body;
+        const destinations = await DestinationService.searchDestinations(searchTerm, isBudgetFriendly, isMidRange, isLuxurious, Sheltered);
+        const destinationsList = destinations.map(destination => ({
+            name: destination.name,
+            imagePath: destination.images.mainImage,
+        }));
+        return res.status(200).json({ destinationsList });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to find results" });
+    }
+};
+
 //might be deleted
 exports.getWeather = async (req, res, next) => {
     try {

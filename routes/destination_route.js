@@ -17,6 +17,7 @@ destinationRouter.post('/add-destination', DestinationController.addDestination)
 destinationRouter.post('/upload-images', DestinationController.uploadImages);
 destinationRouter.post('/get-uploaded-images', DestinationController.getUploadedImages);
 destinationRouter.post('/delete-uploads/:uploadedImagesId', DestinationController.deleteUploadedImages);
+destinationRouter.post('/search-destination', DestinationController.searchDestination);
 
 destinationRouter.post('/get-weather', DestinationController.getWeather);
 module.exports = destinationRouter;

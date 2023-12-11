@@ -369,6 +369,57 @@ class DestinationService {
 
   }
 
+  static async searchDestinations(searchTerm, isBudgetFriendly, isMidRange, isLuxurious, sheltered) {
+    try {
+      const searchTerms = searchTerm.split(' ');
+      const cities = ['ramallah', 'nablus', 'jerusalem', 'bethlehem'];
+      const regexSearchTerms = searchTerm.split(' ').map(term => new RegExp(term, 'i'));
+
+      let query = {
+        $or: [
+          { 'location.address': { $in: regexSearchTerms } },
+          { 'name': { $in: regexSearchTerms } },
+          { 'category': { $in: regexSearchTerms } },
+          { 'geotags': { $in: regexSearchTerms } },
+        ],
+      };
+
+      if (cities.some(city => searchTerm.toLowerCase().includes(city.toLowerCase()))) {
+        query['$and'] = [
+          { 'location.address': { $in: regexSearchTerms } },
+          {
+            $or: [
+              { 'name': { $in: regexSearchTerms } },
+              { 'category': { $in: regexSearchTerms } },
+              { 'geotags': { $in: regexSearchTerms } },
+            ]
+          },
+        ];
+      }
+      const budgetOptions = [];
+      if (isBudgetFriendly === "true") budgetOptions.push('budgetfriendly');
+      if (isMidRange === "true") budgetOptions.push('midrange');
+      if (isLuxurious === "true") budgetOptions.push('luxurious');
+
+      if (budgetOptions.length > 0) {
+        query['budget'] = { $in: budgetOptions };
+      }
+
+      if (sheltered === "true") {
+        query.sheltered = sheltered;
+      }
+
+      console.log('Constructed Query:', JSON.stringify(query));
+      const results = await DestinationModel.find(query);
+      console.log(results);
+      return results;
+    } catch (error) {
+      console.error(error);
+      throw new Error('An error occurred while searching for destinations.');
+    }
+  }
+
+
 }
 
 
