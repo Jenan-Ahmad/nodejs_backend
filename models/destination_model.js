@@ -203,6 +203,9 @@ const destinationSchema = new mongoose.Schema({
     addedBy: {
         type: String,
     },
+    date: {
+        type: String,
+    },
 });
 
 const DestinationModel = db.model("destinations", destinationSchema);

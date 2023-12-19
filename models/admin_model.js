@@ -29,9 +29,6 @@ const adminSchema = new mongoose.Schema({
         type: String,
         required: [true, "Password is required"],
     },
-    remember_me: {
-        type: String,
-    },
 });
 
 // Middleware to hash the password before saving it
@@ -55,24 +52,24 @@ adminSchema.pre("save", async function (next) {
 
 adminSchema.methods.encryptPassword = async function (password) {
     try {
-      const salt = await bcrypt.genSalt(10);
-      const hash = await bcrypt.hash(password, salt);
-      return hash;
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
+        return hash;
     } catch (error) {
-      throw error;
+        throw error;
     }
-  };
-  
-  adminSchema.methods.comparePassword = async function (candidatePassword) {
+};
+
+adminSchema.methods.comparePassword = async function (candidatePassword) {
     try {
-      console.log('----------------password', this.password);
-      // @ts-ignore
-      const isMatch = await bcrypt.compare(candidatePassword, this.password);
-      return isMatch;
+        console.log('----------------password', this.password);
+        // @ts-ignore
+        const isMatch = await bcrypt.compare(candidatePassword, this.password);
+        return isMatch;
     } catch (error) {
-      throw error;
+        throw error;
     }
-  };
-  
-  const AdmintModel = db.model("admins", admintSchema);
-  module.exports = AdminModel;
+};
+
+const AdminModel = db.model("admins", adminSchema);
+module.exports = AdminModel;

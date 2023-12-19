@@ -1,4 +1,5 @@
 const TouristService = require("../services/tourist_service");
+const AdminService = require("../services/admin_service");
 const admin = require("../config/fb");
 const bucket = admin.storage().bucket();//firebase storage bucket
 const multer = require('multer');
@@ -28,7 +29,7 @@ exports.signup = async (req, res, next) => {
       //token sent to the user for their session
       const token = await TouristService.generateAccessToken({
         email: email
-      }, "secret", "1h")
+      }, "secret", "1d")
       const emailverif = await TouristService.verifyEmail(vtoken, firstName, lastName, email, password);
       return res.status(200).json({ message: "A verification email is sent to you", token: token });
     }
@@ -84,9 +85,17 @@ exports.login = async (req, res, next) => {
     }
     const tourist = await TouristService.getTouristByEmail(email);
     if (!tourist) {
-      //will check if admin
-      //if not throw error
-      return res.status(500).json({ error: 'User does not exist' });
+      const admin = await AdminService.getAdminByEmail(email);
+      if (!admin) {
+        return res.status(500).json({ error: 'User does not exist' });
+      }
+      // const isPasswordCorrect = await admin.comparePassword(password);
+      if (password !== admin.password) {
+        return res.status(500).json({ error: 'Username or Password does not match' });
+      }
+      const tokenData = { email: admin.email };
+      const token = await TouristService.generateAccessToken(tokenData, "secret", "1d");
+      return res.status(200).json({ status: true, success: "sendData", token: token, firstName: admin.firstName, lastName: admin.lastName, password: password, profileImage: admin.profileImage, type: 200 });//type 200->admin
     } else {//if tourist
       const isPasswordCorrect = await tourist.comparePassword(password);
       if (isPasswordCorrect == false) {
@@ -94,7 +103,7 @@ exports.login = async (req, res, next) => {
       }
       // Creating Token
       const tokenData = { email: tourist.email };
-      const token = await TouristService.generateAccessToken(tokenData, "secret", "1h");
+      const token = await TouristService.generateAccessToken(tokenData, "secret", "1d");
       return res.status(200).json({ status: true, success: "sendData", token: token, firstName: tourist.firstName, lastName: tourist.lastName, password: password, profileImage: tourist.profileImage, type: 100 });//type 100->tourist
     }
   } catch (error) {
@@ -113,7 +122,7 @@ exports.loginGGL = async (req, res, next) => {
       return res.status(500).json({ error: 'Log In with Google Failed' });
     }
     const tokenData = { email: email };
-    const token = await TouristService.generateAccessToken(tokenData, "secret", "1h");
+    const token = await TouristService.generateAccessToken(tokenData, "secret", "1d");
     const tourist = await TouristService.getTouristByEmail(email);
     if (!tourist) {
       //create new tourist return flag to front

@@ -1,5 +1,7 @@
 const TouristService = require("../services/tourist_service");
+const AdminService = require("../services/admin_service");
 const DestinationService = require("../services/destination_service");
+const PlanService = require("../services/plan_service");
 const admin = require("../config/fb");
 const bucket = admin.storage().bucket();//firebase storage bucket
 const multer = require('multer');
@@ -364,27 +366,27 @@ exports.getComplaints = async (req, res, next) => {
     }
 };
 
-exports.addDestination = async (req, res, next) => {
-    console.log("------------------Add Destination------------------");
-    try {
-        const { name, description, activityList, longitude,
-            latitude, address, category, services, geotags,
-            contact, budget, workingHours, displayedDuration,
-            visitorsType, sheltered } = req.body;
-        //this will be used to receive images
-        // upload.fields([{ name: 'discreteImage', maxCount: 1 }, { name: 'arrayOfImages' }]),
-        const destination = await DestinationService.addDestination(
-            name, description, activityList, longitude,
-            latitude, address, category, services, geotags,
-            contact, budget, workingHours, displayedDuration,
-            visitorsType, sheltered
-        )
-        return res.status(200).json({ message: "Destination added successfully" });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ error: "Failed to add destination" });
-    }
-};
+// exports.addDestination = async (req, res, next) => {
+//     console.log("------------------Add Destination------------------");
+//     try {
+//         const { name, description, activityList, longitude,
+//             latitude, address, category, services, geotags,
+//             contact, budget, workingHours, displayedDuration,
+//             visitorsType, sheltered } = req.body;
+//         //this will be used to receive images
+//         // upload.fields([{ name: 'discreteImage', maxCount: 1 }, { name: 'arrayOfImages' }]),
+//         const destination = await DestinationService.addDestination(
+//             name, description, activityList, longitude,
+//             latitude, address, category, services, geotags,
+//             contact, budget, workingHours, displayedDuration,
+//             visitorsType, sheltered
+//         )
+//         return res.status(200).json({ message: "Destination added successfully" });
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json({ error: "Failed to add destination" });
+//     }
+// };
 
 exports.uploadImages = async (req, res, next) => {
     console.log("------------------Upload Images------------------");
@@ -499,7 +501,8 @@ exports.searchDestination = async (req, res, next) => {
         const touristData = await TouristService.getEmailFromToken(token);
         const tourist = await TouristService.getTouristByEmail(touristData.email);
         const { searchTerm, isBudgetFriendly, isMidRange, isLuxurious, Sheltered } = req.body;
-        const destinations = await DestinationService.searchDestinations(searchTerm, isBudgetFriendly, isMidRange, isLuxurious, Sheltered);
+        const FSearchTerm = searchTerm.trim();
+        const destinations = await DestinationService.searchDestinations(FSearchTerm, isBudgetFriendly, isMidRange, isLuxurious, Sheltered);
         const destinationsList = destinations.map(destination => ({
             name: destination.name,
             imagePath: destination.images.mainImage,
@@ -510,6 +513,399 @@ exports.searchDestination = async (req, res, next) => {
         return res.status(500).json({ error: "Failed to find results" });
     }
 };
+
+///////////////////////Admin side
+
+exports.getStatistics = async (req, res, next) => {
+    console.log("------------------Get Visits------------------");
+    try {
+        const { StatisticType } = req.body;
+        switch (StatisticType) {
+            case 'Visits Count':
+                return await this.getVisits(req, res, next);
+            case 'Reviews Count':
+                return await this.getReviewsNum(req, res, next);
+            case 'Complaints Count':
+                return await this.getComplaintsNum(req, res, next);
+            case 'Ratings Count':
+                return await this.getRatings(req, res, next);
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to find results" });
+    }
+};
+
+exports.getVisits = async (req, res, next) => {
+    console.log("------------------Get Visits------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { city, category } = req.body;
+        if (city === "allcities") {
+            if (category === "bycity") {
+                const visitsList = await AdminService.getVisitsByCity();
+                const graphData = [];
+                for (const item of visitsList) {
+                    const transformedItem = {
+                        [item.city]: item.totalViews
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            } else if (category === "bycategory") {
+                const visitsList = await AdminService.getVisitsByCitiesCategories();
+                const graphData = [];
+                for (const item of visitsList) {
+                    const transformedItem = {
+                        [item.category]: item.totalViews
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            } else {
+                const visitsList = await AdminService.getVisitsAllCitiesDiscrete(category);
+                const graphData = [];
+                for (const item of visitsList) {
+                    const transformedItem = {
+                        [item.placeName]: item.totalViews
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            }
+        } else {
+            if (category === 'bycategory') {
+                const visitsList = await AdminService.getVisitsByCategory(city);
+                const graphData = [];
+                for (const item of visitsList) {
+                    const transformedItem = {
+                        [item.category]: item.totalViews
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            } else {
+                const visitsList = await AdminService.getVisitsInCityDiscrete(city, category);
+                const graphData = [];
+                for (const item of visitsList) {
+                    const transformedItem = {
+                        [item.placeName]: item.totalViews
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to find results" });
+    }
+
+};
+
+exports.getReviewsNum = async (req, res, next) => {
+    console.log("------------------Get Reviews------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { city, category } = req.body;
+        if (city === "allcities") {
+            if (category === "bycity") {
+                const reviewsList = await AdminService.getReviewsByCity();
+                const graphData = [];
+                for (const item of reviewsList) {
+                    const transformedItem = {
+                        [item.city]: item.totalReviews
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            } else if (category === "bycategory") {
+                const reviewsList = await AdminService.getReviewsByCitiesCategories();
+                const graphData = [];
+                for (const item of reviewsList) {
+                    const transformedItem = {
+                        [item.category]: item.totalReviews
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            } else {
+                const reviewsList = await AdminService.getReviewsAllCitiesDiscrete(category);
+                const graphData = [];
+                for (const item of reviewsList) {
+                    const transformedItem = {
+                        [item.placeName]: item.totalReviews
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            }
+        } else {
+            if (category === 'bycategory') {
+                const reviewsList = await AdminService.getReviewsByCategory(city);
+                const graphData = [];
+                for (const item of reviewsList) {
+                    const transformedItem = {
+                        [item.category]: item.totalReviews
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            } else {
+                const reviewsList = await AdminService.getReviewsInCityDiscrete(city, category);
+                const graphData = [];
+                for (const item of reviewsList) {
+                    const transformedItem = {
+                        [item.placeName]: item.totalReviews
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to find results" });
+    }
+};
+
+exports.getComplaintsNum = async (req, res, next) => {
+    console.log("------------------Get Complaints------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { city, category } = req.body;
+        if (city === "allcities") {
+            if (category === "bycity") {
+                const complaintsList = await AdminService.getComplaintsByCity();
+                const graphData = [];
+                for (const item of complaintsList) {
+                    const transformedItem = {
+                        [item.city]: item.totalComplaints
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            } else if (category === "bycategory") {
+                const complaintsList = await AdminService.getComplaintsByCitiesCategories();
+                const graphData = [];
+                for (const item of complaintsList) {
+                    const transformedItem = {
+                        [item.category]: item.totalComplaints
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            } else {
+                const complaintsList = await AdminService.getComplaintsAllCitiesDiscrete(category);
+                const graphData = [];
+                for (const item of complaintsList) {
+                    const transformedItem = {
+                        [item.placeName]: item.totalComplaints
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            }
+        } else {
+            if (category === 'bycategory') {
+                const complaintsList = await AdminService.getComplaintsByCategory(city);
+                const graphData = [];
+                for (const item of complaintsList) {
+                    const transformedItem = {
+                        [item.category]: item.totalComplaints
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            } else {
+                const complaintsList = await AdminService.getComplaintsInCityDiscrete(city, category);
+                const graphData = [];
+                for (const item of complaintsList) {
+                    const transformedItem = {
+                        [item.placeName]: item.totalComplaints
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to find results" });
+    }
+};
+
+exports.getRatings = async (req, res, next) => {
+    console.log("------------------Get Ratings------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { city, category } = req.body;
+        if (city === "allcities") {
+            if (category === "bycity") {
+                const ratingsList = await AdminService.getRatingsByCity();
+                const graphData = [];
+                for (const item of ratingsList) {
+                    const transformedItem = {
+                        [item.city]: item.averageRating
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            } else if (category === "bycategory") {
+                const ratingsList = await AdminService.getRatingsByCitiesCategories();
+                const graphData = [];
+                for (const item of ratingsList) {
+                    const transformedItem = {
+                        [item.category]: item.averageRating
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            } else {
+                const ratingsList = await AdminService.getRatingsAllCitiesDiscrete(category);
+                const graphData = [];
+                for (const item of ratingsList) {
+                    const transformedItem = {
+                        [item.placeName]: item.averageRating
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            }
+        } else {
+            if (category === 'bycategory') {
+                const ratingsList = await AdminService.getRatingsByCategory(city);
+                const graphData = [];
+                for (const item of ratingsList) {
+                    const transformedItem = {
+                        [item.category]: item.averageRating
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            } else {
+                const ratingsList = await AdminService.getRatingsInCityDiscrete(city, category);
+                const graphData = [];
+                for (const item of ratingsList) {
+                    const transformedItem = {
+                        [item.placeName]: item.averageRating
+                    };
+                    graphData.push(transformedItem);
+                }
+                return res.status(200).json({ graphData });
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to find results" });
+    }
+
+};
+
+exports.addDestination = async (req, res, next) => {
+    console.log("------------------Add Destination------------------");
+    let errmsg = "";
+    try {
+        upload.array('images')(req, res, async (err) => {
+            console.log(req.body);
+
+            const token = req.headers.authorization.split(' ')[1];
+            const adminData = await TouristService.getEmailFromToken(token);
+            const admin = await AdminService.getAdminByEmail(adminData.email);
+            if (!admin) {
+                errmsg = "User does not exist";
+                return;
+            }
+            const { destinationName } = req.body;
+            const existDestination = await DestinationService.getDestinationByName(destinationName);
+            if (existDestination) {
+                return res.status(500).json({ message: "Destination already exists" });
+            }
+            const { about, activities, longitude,
+                latitude, city, category, services, otherServices, geoTags,
+                contact, budget, openingTime, closingTime, workingDays
+                , timeToSpend, visitorTypes, ageCategories, sheltered, date } = req.body;
+            if (!req.files || req.files.length === 0) {
+                console.log("no image");
+                return res.status(500).json({ message: "The destination was not added" });
+            }
+            const imageUrls = [];
+            for (const file of req.files) {
+                await new Promise((resolve, reject) => {
+                    const metadata = {
+                        metadata: {
+                            firebaseStorageDownloadTokens: uuid()
+                        },
+                        contentType: file.mimetype,
+                        cacheControl: "public, max-age=31536000"
+                    };
+                    const folder = 'destinations_images'; // Specify your desired folder name
+                    const fileName = `${folder}/${file.originalname}`;
+                    const blob = bucket.file(fileName);
+                    const blobStream = blob.createWriteStream({
+                        metadata: metadata,
+                        gzip: true
+                    });
+                    blobStream.on("error", (err) => {
+                        console.error(err);
+                        res.status(500).json({ message: 'Unable to upload' });
+                    });
+                    blobStream.on("finish", async () => {
+                        const fileUrl = `${folder}%2F${file.originalname}`;
+                        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${fileUrl}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
+                        imageUrls.push(imageUrl);
+                        resolve();
+                    });
+                    blobStream.end(file.buffer);
+                });
+            }
+            console.log("here", imageUrls.length, "\n");
+            const geotagsList = JSON.parse(geoTags);
+            const visitorTypesList = JSON.parse(visitorTypes);
+            const ageCategoriesList = JSON.parse(ageCategories);
+            const workingdays = JSON.parse(workingDays);
+            const workingHours = { openingTime, closingTime, workingdays };
+            const displayedDuration = await PlanService.getHour(timeToSpend);
+            const activityList = JSON.parse(activities);
+            const servicesList = JSON.parse(services);
+            const otherServicesList = JSON.parse(otherServices);
+            const combinedServicesList = [...servicesList, ...otherServicesList];
+            const servicesObjects = combinedServicesList.map(service => ({ name: service }));
+            const destination = await AdminService.addDestination(
+                destinationName, about, activityList, longitude,
+                latitude, city, category, servicesObjects, geotagsList,
+                contact, budget, workingHours, displayedDuration,
+                visitorTypesList, ageCategoriesList, sheltered, imageUrls[0], imageUrls.slice(1), date, admin.email
+            )
+            return res.status(200).json({ message: "Destination added successfully" });
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to add destination" });
+    }
+};
+
+
 
 //might be deleted
 exports.getWeather = async (req, res, next) => {

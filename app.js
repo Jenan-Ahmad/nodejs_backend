@@ -6,6 +6,8 @@ const TouristRoute = require('./routes/tourist_route');
 const DestinationRoute = require('./routes/destination_route');
 const PlanRoute = require('./routes/plan_route');
 const suggestionRoute = require('./routes/suggestion_route');
+const adminRoute = require('./routes/admin_route');
+
 
 // Middleware setup
 // app.use(express.json()); // JSON request body parsing
@@ -17,5 +19,7 @@ app.use("/", TouristRoute); // Example route
 app.use("/", DestinationRoute);
 app.use("/", PlanRoute);
 app.use("/", suggestionRoute);
+app.use("/", adminRoute);
+
 
 module.exports = app;

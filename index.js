@@ -4,6 +4,8 @@ const touristRouter = require('./routes/tourist_route');
 const destinationRouter = require('./routes/destination_route');
 const planRouter = require('./routes/plan_route');
 const suggestionRouter = require('./routes/suggestion_route');
+const adminRouter = require('./routes/admin_route');
+
 
 const port = 3000;
 

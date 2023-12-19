@@ -347,28 +347,6 @@ class DestinationService {
     );
   }
 
-  static async addDestination(
-    name, description, activityList, longitude,
-    latitude, address, category, services, geotags,
-    contact, budget, workingHours, displayedDuration,
-    visitorsType, sheltered
-  ) {
-    try {
-      const location = { longitude, latitude, address }
-      const estimatedDuration = { displayedDuration };
-      const destination = new DestinationModel({
-        name, description, activityList, location, category, services, geotags,
-        contact, budget, workingHours, estimatedDuration,
-        visitorsType, sheltered
-      });
-      await destination.save();
-    } catch (error) {
-      console.log(error);
-      throw new Error("An error occurred adding the new destination");
-    }
-
-  }
-
   static async searchDestinations(searchTerm, isBudgetFriendly, isMidRange, isLuxurious, sheltered) {
     try {
       const searchTerms = searchTerm.split(' ');
