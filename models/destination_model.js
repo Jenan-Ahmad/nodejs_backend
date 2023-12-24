@@ -196,9 +196,12 @@ const destinationSchema = new mongoose.Schema({
                 type: String,
             },
             seen: {
-                type: String
-            }
-        }
+                type: String,
+            },
+            hidden: {
+                type: String,
+            },
+        },
     ],
     addedBy: {
         type: String,

@@ -309,7 +309,7 @@ class DestinationService {
         {
           $push: {
             complaints: {
-              email: email, date: date, title: title, complaint: complaint, images: images, seen: "false"
+              email: email, date: date, title: title, complaint: complaint, images: images, seen: "false", hidden: "false"
             }
           }
         }
@@ -397,6 +397,93 @@ class DestinationService {
     }
   }
 
+  static async getComplaints(destinationName) {
+    try {
+      return await DestinationModel.aggregate([
+        { $match: { name: destinationName } },
+        { $unwind: '$complaints' },
+        {
+          $project: {
+            _id: 0,
+            complaints: {
+              $cond: {
+                if: {
+                  $or: [
+                    { $eq: ['$complaints.hidden', null] },
+                    { $ne: ['$complaints.hidden', 'true'] }
+                  ]
+                },
+                then: '$complaints',
+                else: null
+              }
+            }
+          }
+        },
+        { $match: { complaints: { $ne: null } } }
+      ]);
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while retrieving the destinations');
+    }
+  }
+
+  static async setHiddenTrue(destinationName) {
+    try {
+      return await DestinationModel.updateMany(
+        { name: destinationName },
+        {
+          $set: {
+            'complaints.$[elem].hidden': 'true',
+          },
+        },
+        {
+          arrayFilters: [
+            {
+              $or: [
+                { 'elem.hidden': { $exists: true } },
+                { 'elem.hidden': { $exists: false } },
+              ],
+            },
+          ],
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while retrieving the destinations');
+    }
+  }
+
+  static async setOneHiddenTrue(destinationName, complaintId) {
+    try {
+      return await DestinationModel.updateOne(
+        { name: destinationName, 'complaints._id': complaintId },
+        {
+          $set: {
+            'complaints.$.hidden': 'true',
+          },
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while deleting the destinations');
+    }
+  }
+
+  static async setSeen(destinationName, complaintId) {
+    try {
+      return await DestinationModel.updateOne(
+        { name: destinationName, 'complaints._id': complaintId },
+        {
+          $set: {
+            'complaints.$.seen': 'true',
+          },
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while updating the destinations');
+    }
+  }
 
 }
 

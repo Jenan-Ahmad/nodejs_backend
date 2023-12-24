@@ -335,7 +335,7 @@ exports.addComplaint = async (req, res, next) => {
                 console.log("failed to add complaint with no images");
                 throw new Error("Faield to add your complaint");
             }
-            return res.status(200).json("Your complaint was added");
+            return res.status(200).json({ message: "Your complaint was added" });
         });
     } catch (error) {
         console.log(error);
@@ -365,28 +365,6 @@ exports.getComplaints = async (req, res, next) => {
         return res.status(500).json({ error: "Failed to retrieve your complaints" });
     }
 };
-
-// exports.addDestination = async (req, res, next) => {
-//     console.log("------------------Add Destination------------------");
-//     try {
-//         const { name, description, activityList, longitude,
-//             latitude, address, category, services, geotags,
-//             contact, budget, workingHours, displayedDuration,
-//             visitorsType, sheltered } = req.body;
-//         //this will be used to receive images
-//         // upload.fields([{ name: 'discreteImage', maxCount: 1 }, { name: 'arrayOfImages' }]),
-//         const destination = await DestinationService.addDestination(
-//             name, description, activityList, longitude,
-//             latitude, address, category, services, geotags,
-//             contact, budget, workingHours, displayedDuration,
-//             visitorsType, sheltered
-//         )
-//         return res.status(200).json({ message: "Destination added successfully" });
-//     } catch (error) {
-//         console.log(error);
-//         return res.status(500).json({ error: "Failed to add destination" });
-//     }
-// };
 
 exports.uploadImages = async (req, res, next) => {
     console.log("------------------Upload Images------------------");
@@ -824,17 +802,14 @@ exports.getRatings = async (req, res, next) => {
 
 exports.addDestination = async (req, res, next) => {
     console.log("------------------Add Destination------------------");
-    let errmsg = "";
     try {
         upload.array('images')(req, res, async (err) => {
             console.log(req.body);
-
             const token = req.headers.authorization.split(' ')[1];
             const adminData = await TouristService.getEmailFromToken(token);
             const admin = await AdminService.getAdminByEmail(adminData.email);
             if (!admin) {
-                errmsg = "User does not exist";
-                return;
+                return res.status(500).json({ message: "User does not exist" });
             }
             const { destinationName } = req.body;
             const existDestination = await DestinationService.getDestinationByName(destinationName);
@@ -905,7 +880,173 @@ exports.addDestination = async (req, res, next) => {
     }
 };
 
+exports.getDestinations = async (req, res, next) => {
+    console.log("------------------Get Destinations------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const allDestinations = await DestinationService.getDestinations();
+        const destinations = [];
+        for (const destination of allDestinations) {
+            const transformedItem = {
+                [destination.name]: destination.images.mainImage
+            };
+            destinations.push(transformedItem);
+        }
+        return res.status(200).json({ destinations });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to get destinations" });
+    }
+};
 
+exports.getDestinationReviews = async (req, res, next) => {
+    console.log("------------------Get All Reviews------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationName } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const reviews = destination.reviews.map(review => ({
+            firstName: review.user.firstName,
+            lastName: review.user.lastName,
+            date: review.date,
+            stars: review.stars,
+            commentTitle: review.title,
+            commentContent: review.feedback
+        }));
+        return res.status(200).json({ reviews: reviews });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Reviews are not available for this destination" });
+    }
+};
+
+exports.getDestinationComplaints = async (req, res, next) => {
+    console.log("------------------Get All Complaints------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationName } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const filteredComplaints = destination.complaints.filter(complaint => complaint.hidden !== 'true');
+        const complaints = await Promise.all(filteredComplaints.map(async (complaint) => {
+            const tourist = await TouristService.getTouristByEmail(complaint.email);
+            return {
+                id: complaint._id,
+                firstName: tourist.firstName,
+                lastName: tourist.lastName,
+                title: complaint.title,
+                complaint: complaint.complaint,
+                images: complaint.images,
+                date: complaint.date,
+                seen: complaint.seen,
+            };
+        }));
+        return res.status(200).json({ complaints: complaints });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Complaints are not available for this destination" });
+    }
+};
+
+exports.hideComplaints = async (req, res, next) => {
+    console.log("------------------Get All Complaints------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationName } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const update = await DestinationService.setHiddenTrue(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Failed to delete the complaints' });
+        }
+        return res.status(200).json({ message: "Complaintes were deleted" });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to delete the complaints' });
+    }
+};
+
+exports.hideComplaint = async (req, res, next) => {
+    console.log("------------------Get All Complaints------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationName, complaintId } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const update = await DestinationService.setOneHiddenTrue(destinationName, complaintId);
+        if (!update) {
+            return res.status(500).json({ error: 'Failed to delete the complaint' });
+        }
+        return res.status(200).json({ message: "Complaint was deleted" });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to delete the complaint' });
+    }
+};
+
+exports.markComplaintAsSeen = async (req, res, next) => {
+    console.log("------------------Mark Complaint------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationName, complaintId } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const update = await DestinationService.setSeen(destinationName, complaintId);
+        if (!update) {
+            return res.status(500).json({ error: 'Failed to update the complaint' });
+        }
+        return res.status(200).json({ message: "Complaint was updated" });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to update the complaint' });
+    }
+};
 
 //might be deleted
 exports.getWeather = async (req, res, next) => {

@@ -4,7 +4,7 @@ const { toInteger } = require('lodash');
 
 const adminRouter = express.Router();
 
-// adminRouter.post('/signup', AdminController.signup);
+// adminRouter.post('/get-destinations', AdminController.signup);
 
 
 module.exports = adminRouter;

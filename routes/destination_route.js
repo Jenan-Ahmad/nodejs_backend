@@ -18,8 +18,13 @@ destinationRouter.post('/upload-images', DestinationController.uploadImages);
 destinationRouter.post('/get-uploaded-images', DestinationController.getUploadedImages);
 destinationRouter.post('/delete-uploads/:uploadedImagesId', DestinationController.deleteUploadedImages);
 destinationRouter.post('/search-destination', DestinationController.searchDestination);
-
-destinationRouter.post('/get-statistics', DestinationController.getStatistics); 
+destinationRouter.post('/get-statistics', DestinationController.getStatistics);
+destinationRouter.post('/get-destinations', DestinationController.getDestinations);
+destinationRouter.post('/get-destination-reviews', DestinationController.getDestinationReviews);
+destinationRouter.post('/get-destination-complaints', DestinationController.getDestinationComplaints);
+destinationRouter.post('/delete-all-complaints', DestinationController.hideComplaints);
+destinationRouter.post('/delete-complaint', DestinationController.hideComplaint);
+destinationRouter.post('/mark-complaint-as-seen', DestinationController.markComplaintAsSeen);
 
 destinationRouter.post('/get-weather', DestinationController.getWeather);
 module.exports = destinationRouter;
