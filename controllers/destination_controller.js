@@ -1048,6 +1048,120 @@ exports.markComplaintAsSeen = async (req, res, next) => {
     }
 };
 
+exports.getDestinationUploads = async (req, res, next) => {
+    console.log("------------------Get Destination Uploads------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationName } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const filteredUploads = destination.images.pendingImages.filter(pendingImages => pendingImages.status.toLocaleLowerCase() === 'pending');
+        const uploadedImages = await Promise.all(filteredUploads.map(async (pendingImages) => {
+            return {
+                id: pendingImages._id,
+                keywords: pendingImages.keywords,
+                date: pendingImages.date,
+                images: pendingImages.images,
+                status: pendingImages.status,
+            };
+        }));
+        return res.status(200).json({ uploadedImages: uploadedImages });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to retrieve uploads' });
+    }
+};
+
+exports.approveAnUpload = async (req, res, next) => {
+    console.log("------------------Approve An Upload------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationName, approvedImages, uploadId } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const update1 = await DestinationService.uploadDescriptiveImages(destinationName, approvedImages);
+        if (!update1) {
+            return res.status(500).json({ error: 'Approval Failed' });
+        }
+        const update2 = await DestinationService.approvePendingImages(destinationName, uploadId);
+        if (!update2) {
+            return res.status(500).json({ error: 'Approval Failed' });
+        }
+        return res.status(200).json({ message: "Images were uploaded" });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to approve the uploaded image' });
+    }
+};
+
+exports.rejectAllUplaods = async (req, res, next) => {
+    console.log("------------------Reject All Uploads------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationName } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const update = await DestinationService.rejectAllPendingImages(destinationName);
+        if (!update) {
+            return res.status(500).json({ error: 'Rejection Failed' });
+        }
+        return res.status(200).json({ message: "Images were rejected" });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to reject the uploaded image' });
+    }
+};
+
+exports.rejectAnUpload = async (req, res, next) => {
+    console.log("------------------Reject An Upload------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationName, uploadId } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const update = await DestinationService.rejectPendingImages(destinationName, uploadId);
+        if (!update) {
+            return res.status(500).json({ error: 'Rejection Failed' });
+        }
+        return res.status(200).json({ message: "Images were rejected" });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to reject the uploaded image' });
+    }
+};
+
 //might be deleted
 exports.getWeather = async (req, res, next) => {
     try {

@@ -25,6 +25,11 @@ destinationRouter.post('/get-destination-complaints', DestinationController.getD
 destinationRouter.post('/delete-all-complaints', DestinationController.hideComplaints);
 destinationRouter.post('/delete-complaint', DestinationController.hideComplaint);
 destinationRouter.post('/mark-complaint-as-seen', DestinationController.markComplaintAsSeen);
+destinationRouter.post('/get-destination-uploads', DestinationController.getDestinationUploads);
+destinationRouter.post('/approve-an-upload', DestinationController.approveAnUpload);
+destinationRouter.post('/reject-all-uplaods', DestinationController.rejectAllUplaods);
+destinationRouter.post('/reject-an-upload', DestinationController.rejectAnUpload);
+
 
 destinationRouter.post('/get-weather', DestinationController.getWeather);
 module.exports = destinationRouter;

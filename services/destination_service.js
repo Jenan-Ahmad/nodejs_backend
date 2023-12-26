@@ -43,7 +43,7 @@ class DestinationService {
 
   static async updateReview(email, destination, stars, title, content, date) {
     try {
-      return DestinationModel.updateOne({ name: destination.name, 'reviews.user.email': email }, { $set: { 'reviews.$.stars': stars, 'reviews.$.title': title, 'reviews.$.feedback': content, 'reviews.$.date': date } });
+      return await DestinationModel.updateOne({ name: destination.name, 'reviews.user.email': email }, { $set: { 'reviews.$.stars': stars, 'reviews.$.title': title, 'reviews.$.feedback': content, 'reviews.$.date': date } });
     } catch (error) {
       throw new Error("An error occurred updating your review");
     }
@@ -51,7 +51,7 @@ class DestinationService {
 
   static async saveReview(tourist, destination, stars, title, content, date) {
     try {
-      return DestinationModel.updateOne(
+      return await DestinationModel.updateOne(
         { name: destination.name },
         {
           $push: {
@@ -90,15 +90,15 @@ class DestinationService {
       }
       switch (newRating) {
         case 1:
-          return DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.oneStar': 1 } });
+          return await DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.oneStar': 1 } });
         case 2:
-          return DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.twoStars': 1 } });
+          return await DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.twoStars': 1 } });
         case 3:
-          return DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.threeStars': 1 } });
+          return await DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.threeStars': 1 } });
         case 4:
-          return DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.fourStars': 1 } });
+          return await DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.fourStars': 1 } });
         case 5:
-          return DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.fiveStars': 1 } });
+          return await DestinationModel.updateOne({ name: destination.name }, { $inc: { 'rating.fiveStars': 1 } });
         default:
           break;
       }
@@ -110,7 +110,7 @@ class DestinationService {
 
   static async uploadImages(destination, email, date, imageUrls, keywords) {
     try {
-      return DestinationModel.updateOne(
+      return await DestinationModel.updateOne(
         { name: destination.name },
         {
           $push: {
@@ -304,7 +304,7 @@ class DestinationService {
   static async addComplaint(destination, email, title, complaint, date, images) {
     try {
       console.log(destination.name, title, complaint, email, images.length);
-      return DestinationModel.updateOne(
+      return await DestinationModel.updateOne(
         { name: destination.name },
         {
           $push: {
@@ -321,7 +321,7 @@ class DestinationService {
 
   static async incrementViewedTimes(name) {
     try {
-      return DestinationModel.updateOne({ name: name }, { $inc: { viewedTimes: 1 } });
+      return await DestinationModel.updateOne({ name: name }, { $inc: { viewedTimes: 1 } });
     } catch (error) {
       console.log(error);
       console.log("--------------------------------------------------------------------------");
@@ -476,6 +476,71 @@ class DestinationService {
         {
           $set: {
             'complaints.$.seen': 'true',
+          },
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while updating the destinations');
+    }
+  }
+
+  static async uploadDescriptiveImages(destinationName, approvedImages) {
+    try {
+      return await DestinationModel.updateOne(
+        { name: destinationName },
+        {
+          $push: {
+            'images.descriptiveImages': {
+              $each: approvedImages
+            }
+          }
+        }
+      );
+    } catch (error) {
+      throw new Error("An error occurred updating your desciptive images");
+    }
+  }
+
+  static async approvePendingImages(destinationName, uploadId) {
+    try {
+      return await DestinationModel.updateOne(
+        { name: destinationName, 'images.pendingImages._id': uploadId },
+        {
+          $set: {
+            'images.pendingImages.$.status': 'Approved',
+          },
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while updating the destinations');
+    }
+  }
+
+  static async rejectAllPendingImages(destinationName) {
+    try {
+      return await DestinationModel.updateOne(
+        { name: destinationName },
+        {
+          $set: {
+            'images.pendingImages.$[].status': 'Rejected',
+          },
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while updating the destinations');
+    }
+  }
+
+  static async rejectPendingImages(destinationName, uploadId) {
+    try {
+      return await DestinationModel.updateOne(
+        { name: destinationName, 'images.pendingImages._id': uploadId },
+        {
+          $set: {
+            'images.pendingImages.$.status': 'Rejected',
           },
         }
       );
