@@ -77,6 +77,7 @@ class SuggestionService {
                     $set: {
                         "comment.reply": adminComment,
                         "comment.admin": email,
+                        "status": 'Seen',
                     },
                 }
             );
