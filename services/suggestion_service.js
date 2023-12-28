@@ -59,7 +59,7 @@ class SuggestionService {
                 { _id: suggestionId },
                 {
                     $set: {
-                        status: 'Seen',
+                        "status": 'Seen',
                     },
                 }
             );
@@ -69,7 +69,7 @@ class SuggestionService {
         }
     }
 
-    static async markAsSeen(suggestionId, adminComment, email) {
+    static async addComment(suggestionId, adminComment, email) {
         try {
             return await SuggestionModel.updateOne(
                 { _id: suggestionId },

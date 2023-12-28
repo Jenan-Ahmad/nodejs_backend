@@ -164,12 +164,13 @@ exports.getSuggestions = async (req, res, next) => {
 exports.deleteSuggestion = async (req, res, next) => {
     console.log("------------------Delete Suggestion------------------");
     try {
-        const token = req.headers.authorization.split(' ')[1];
-        const adminData = await AdminService.getEmailFromToken(token);
-        const admin = await AdminService.getAdminByEmail(adminData.email);
+    //     const token = req.headers.authorization.split(' ')[1];
+    //     const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail("s11924400@stu.najah.edu");
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
+        console.log(req.params);
         const suggestionId = req.params.suggestionId;
         const updated = await SuggestionService.markAsSeen(suggestionId);
         if (!updated) {
@@ -193,7 +194,7 @@ exports.addComment = async (req, res, next) => {
             return res.status(500).json({ error: 'User does not exist' });
         }
         const { suggestionId, adminComment } = req.body;
-        const updated = await SuggestionService.markAsSeen(suggestionId, adminComment, admin.email);
+        const updated = await SuggestionService.addComment(suggestionId, adminComment, admin.email);
         if (!updated) {
             return res.status(500).json({ error: 'Failed to add a comment to the suggestion' });
         }
