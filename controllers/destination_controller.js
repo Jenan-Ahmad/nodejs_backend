@@ -517,9 +517,9 @@ exports.getStatistics = async (req, res, next) => {
 exports.getVisits = async (req, res, next) => {
     console.log("------------------Get Visits------------------");
     try {
-        const token = req.headers.authorization.split(' ')[1];
-        const adminData = await AdminService.getEmailFromToken(token);
-        const admin = await AdminService.getAdminByEmail(adminData.email);
+        // const token = req.headers.authorization.split(' ')[1];
+        // const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail("s11924400@stu.najah.edu");
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
@@ -589,9 +589,9 @@ exports.getVisits = async (req, res, next) => {
 exports.getReviewsNum = async (req, res, next) => {
     console.log("------------------Get Reviews------------------");
     try {
-        const token = req.headers.authorization.split(' ')[1];
-        const adminData = await AdminService.getEmailFromToken(token);
-        const admin = await AdminService.getAdminByEmail(adminData.email);
+        // const token = req.headers.authorization.split(' ')[1];
+        // const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail("s11924400@stu.najah.edu");
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
@@ -660,9 +660,9 @@ exports.getReviewsNum = async (req, res, next) => {
 exports.getComplaintsNum = async (req, res, next) => {
     console.log("------------------Get Complaints------------------");
     try {
-        const token = req.headers.authorization.split(' ')[1];
-        const adminData = await AdminService.getEmailFromToken(token);
-        const admin = await AdminService.getAdminByEmail(adminData.email);
+        // const token = req.headers.authorization.split(' ')[1];
+        // const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail("s11924400@stu.najah.edu");
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
@@ -731,9 +731,9 @@ exports.getComplaintsNum = async (req, res, next) => {
 exports.getRatings = async (req, res, next) => {
     console.log("------------------Get Ratings------------------");
     try {
-        const token = req.headers.authorization.split(' ')[1];
-        const adminData = await AdminService.getEmailFromToken(token);
-        const admin = await AdminService.getAdminByEmail(adminData.email);
+        // const token = req.headers.authorization.split(' ')[1];
+        // const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail("s11924400@stu.najah.edu");
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
@@ -1094,7 +1094,8 @@ exports.approveAnUpload = async (req, res, next) => {
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
-        const update1 = await DestinationService.uploadDescriptiveImages(destinationName, approvedImages);
+        const approvedImagesList = JSON.parse(approvedImages);
+        const update1 = await DestinationService.uploadDescriptiveImages(destinationName, approvedImagesList);
         if (!update1) {
             return res.status(500).json({ error: 'Approval Failed' });
         }
