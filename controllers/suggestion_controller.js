@@ -164,9 +164,9 @@ exports.getSuggestions = async (req, res, next) => {
 exports.deleteSuggestion = async (req, res, next) => {
     console.log("------------------Delete Suggestion------------------");
     try {
-    //     const token = req.headers.authorization.split(' ')[1];
-    //     const adminData = await AdminService.getEmailFromToken(token);
-        const admin = await AdminService.getAdminByEmail("s11924400@stu.najah.edu");
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
