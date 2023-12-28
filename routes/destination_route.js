@@ -30,6 +30,5 @@ destinationRouter.post('/approve-an-upload', DestinationController.approveAnUplo
 destinationRouter.post('/reject-all-uplaods', DestinationController.rejectAllUplaods);
 destinationRouter.post('/reject-an-upload', DestinationController.rejectAnUpload);
 
-
 destinationRouter.post('/get-weather', DestinationController.getWeather);
 module.exports = destinationRouter;

@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 const express = require('express');
+const { isNull } = require("lodash");
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -332,8 +333,11 @@ class DestinationService {
   static async getWeather(location) {
     try {
       const response = await axios.get(`https://wttr.in/${location}?format=%C+%t`);
+      if (response.data.length === 0) {
+        const weatherResult = "undefind + 00";
+        return weatherResult;
+      }
       const weatherResult = response.data;
-      // console.log(weatherResult);
       return weatherResult;
     } catch (error) {
       console.log("Error occurred inspecting the weather");

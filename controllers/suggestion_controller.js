@@ -1,4 +1,5 @@
 const TouristService = require("../services/tourist_service");
+const AdminService = require("../services/admin_service");
 const SuggestionService = require("../services/suggestion_service");
 const admin = require("../config/fb");
 const bucket = admin.storage().bucket();//firebase storage bucket
@@ -121,5 +122,85 @@ exports.deleteDestination = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Failed to delete the destination" });
+    }
+};
+
+exports.getSuggestions = async (req, res, next) => {
+    console.log("------------------Get Suggestions------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const suggestionsList = await SuggestionService.getAllSuggestions();
+        const suggestions = await Promise.all(suggestionsList.map(async (suggestion) => {
+            const tourist = await TouristService.getTouristByEmail(suggestion.email);
+            return {
+                destID: suggestion._id,
+                firstName: tourist.firstName,
+                lastName: tourist.lastName,
+                imagesURLs: suggestion.images,
+                date: suggestion.date,
+                destinationName: suggestion.name,
+                city: suggestion.city,
+                category: suggestion.category,
+                budget: suggestion.budget,
+                timeToSpend: suggestion.estimatedDuration,
+                sheltered: suggestion.sheltered,
+                status: suggestion.status,
+                about: suggestion.about
+            };
+        }));
+        return res.status(200).json({ uploadedDestinations: suggestions });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to retrieve the suggestions' });
+    }
+};
+
+exports.deleteSuggestion = async (req, res, next) => {
+    console.log("------------------Delete Suggestion------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const suggestionId = req.params.suggestionId;
+        const updated = await SuggestionService.markAsSeen(suggestionId);
+        if (!updated) {
+            return res.status(500).json({ error: 'Failed to delete the suggestion' });
+        }
+        return res.status(200).json({ message: 'Suggestion was deleted successfully' });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to delete the suggestion' });
+    }
+};
+
+exports.addComment = async (req, res, next) => {
+    console.log("------------------Add Comment------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { suggestionId, adminComment } = req.body;
+        const updated = await SuggestionService.markAsSeen(suggestionId, adminComment, admin.email);
+        if (!updated) {
+            return res.status(500).json({ error: 'Failed to add a comment to the suggestion' });
+        }
+        return res.status(200).json({ message: 'Comment was added successfully' });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to add a comment to the suggestion' });
     }
 };

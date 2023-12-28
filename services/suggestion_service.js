@@ -44,5 +44,47 @@ class SuggestionService {
         }
     }
 
+    static async getAllSuggestions() {
+        try {
+            return await SuggestionModel.find({ status: { $regex: /^unseen$/i } });
+        } catch (err) {
+            console.log(err);
+            throw new Error('An error occurred while retrieving the suggestions');
+        }
+    }
+
+    static async markAsSeen(suggestionId) {
+        try {
+            return await SuggestionModel.updateOne(
+                { _id: suggestionId },
+                {
+                    $set: {
+                        status: 'Seen',
+                    },
+                }
+            );
+        } catch (err) {
+            console.log(err);
+            throw new Error('An error occurred while deleting the suggestion');
+        }
+    }
+
+    static async markAsSeen(suggestionId, adminComment, email) {
+        try {
+            return await SuggestionModel.updateOne(
+                { _id: suggestionId },
+                {
+                    $set: {
+                        "comment.reply": adminComment,
+                        "comment.admin": email,
+                    },
+                }
+            );
+        } catch (err) {
+            console.log(err);
+            throw new Error('An error occurred while updating the comment');
+        }
+    }
+
 }
 module.exports = SuggestionService;  
