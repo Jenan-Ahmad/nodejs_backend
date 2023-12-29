@@ -94,8 +94,15 @@ exports.login = async (req, res, next) => {
         return res.status(500).json({ error: 'Username or Password does not match' });
       }
       const tokenData = { email: admin.email };
+      const isNewAdmin = admin.newAdmin;
+      if (admin.newAdmin === 'true') {
+        const updateNewAdmin = await AdminService.updateNewAdmin(email);
+        if (!updateNewAdmin) {
+          return res.status(500).json({ error: 'Login Failed' });
+        }
+      }
       const token = await TouristService.generateAccessToken(tokenData, "secret", "1d");
-      return res.status(200).json({ status: true, success: "sendData", token: token, firstName: admin.firstName, lastName: admin.lastName, password: password, profileImage: admin.profileImage, type: 200 });//type 200->admin
+      return res.status(200).json({ status: true, success: "sendData", token: token, firstName: admin.firstName, lastName: admin.lastName, password: password, profileImage: admin.profileImage, newAdmin: isNewAdmin, type: 200 });//type 200->admin
     } else {//if tourist
       const isPasswordCorrect = await tourist.comparePassword(password);
       if (isPasswordCorrect == false) {

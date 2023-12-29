@@ -686,7 +686,9 @@ class AdminService {
 
     static async addAdmin(firstName, lastName, email, password) {
         try {
-            const createAdmin = new AdminModel({ firstName, lastName, email, password });
+            const newAdmin = 'true';
+            const profileImage = "";
+            const createAdmin = new AdminModel({ firstName, lastName, email, password, newAdmin, profileImage });
             await createAdmin.save();
             return true;
         } catch (error) {
@@ -713,6 +715,16 @@ class AdminService {
             });
         } catch (err) {
             throw new Error('The verification process failed');
+        }
+    }
+
+    static async updateNewAdmin(email) {
+        try {
+            const admin = new AdminModel();
+            return AdminModel.updateOne({ email: email }, { $set: { newAdmin: 'false' } });
+        } catch (error) {
+            console.error(error);
+            throw new Error("An error occurred updating your new admin status");
         }
     }
 }
