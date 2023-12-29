@@ -29,6 +29,8 @@ destinationRouter.post('/get-destination-uploads', DestinationController.getDest
 destinationRouter.post('/approve-an-upload', DestinationController.approveAnUpload);
 destinationRouter.post('/reject-all-uplaods', DestinationController.rejectAllUplaods);
 destinationRouter.post('/reject-an-upload', DestinationController.rejectAnUpload);
+destinationRouter.post('/get-added-destinations', DestinationController.getAddedDestinations);
+
 
 destinationRouter.post('/get-weather', DestinationController.getWeather);
 module.exports = destinationRouter;

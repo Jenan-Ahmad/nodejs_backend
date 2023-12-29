@@ -1162,6 +1162,41 @@ exports.rejectAnUpload = async (req, res, next) => {
     }
 };
 
+exports.getAddedDestinations = async (req, res, next) => {
+    console.log("------------------Get Added Destinations------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        console.log(req.body);
+        const { filter } = req.body;
+        let destinations;
+        if (filter === 'all') {
+            destinations = await DestinationService.getDestinations();
+        } else if (filter.match(/^(ramallah|nablus|jerusalem|bethlehem)$/i)) {
+            destinations = await DestinationService.getDestinationsInCity(filter);
+        } else {//category
+            destinations = await DestinationService.getDestinationsInCategory(filter);
+        }
+        const destinationsList = await Promise.all(destinations.map(async (destination) => {
+            return {
+                name: destination.name,
+                image: destination.images.mainImage,
+                city: destination.location.address,
+                category: destination.category,
+            };
+        }));
+        return res.status(200).json({ destinationsList: destinationsList });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to get added destinations' });
+    }
+};
+
 //might be deleted
 exports.getWeather = async (req, res, next) => {
     try {

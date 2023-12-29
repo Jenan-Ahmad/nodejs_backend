@@ -35,7 +35,7 @@ class DestinationService {
 
   static async getDestinationsInCity(city) {
     try {
-      return await DestinationModel.find({ 'location.address': city });
+      return await DestinationModel.find({ 'location.address': { $regex: new RegExp(city, 'i') } });
     } catch (err) {
       console.log(err);
       throw new Error('An error occurred while retrieving the destination by city');
@@ -551,6 +551,15 @@ class DestinationService {
     } catch (err) {
       console.log(err);
       throw new Error('An error occurred while updating the destinations');
+    }
+  }
+
+  static async getDestinationsInCategory(category) {
+    try {
+      return await DestinationModel.find({ category: { $regex: new RegExp(category, 'i') } });
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while retrieving the destination by category');
     }
   }
 
