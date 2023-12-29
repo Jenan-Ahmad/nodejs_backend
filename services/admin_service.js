@@ -683,6 +683,38 @@ class AdminService {
         }
 
     }
+
+    static async addAdmin(firstName, lastName, email, password) {
+        try {
+            const createAdmin = new AdminModel({ firstName, lastName, email, password });
+            await createAdmin.save();
+            return true;
+        } catch (error) {
+            console.log(error);
+            throw new Error("An error occurred adding the new destination");
+        }
+    }
+
+    static async addAdminEmail(firstName, lastName, email, password) {
+        try {
+            const mailOptions = {
+                from: 'touristineapp@gmail.com',
+                to: email,
+                subject: 'Admin Account Information',
+                text: `Dear ${firstName} ${lastName},\n\nYou can log into your acccount using the following information:\nUsername: ${email}\nPassword: ${password}\n\nBest regards`,
+
+            };
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error(error);
+                    throw new Error('An error occurred sending the verification line')
+                }
+                console.log(`Email sent: ${info.response}`);
+            });
+        } catch (err) {
+            throw new Error('The verification process failed');
+        }
+    }
 }
 
 module.exports = AdminService;    

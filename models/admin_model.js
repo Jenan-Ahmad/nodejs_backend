@@ -29,47 +29,50 @@ const adminSchema = new mongoose.Schema({
         type: String,
         required: [true, "Password is required"],
     },
+    newAdmin: {
+        type: String,
+    },
 });
 
 // Middleware to hash the password before saving it
-adminSchema.pre("save", async function (next) {
-    const admin = this;
-    if (!this.firstName || !this.lastName || !this.email || !this.password) {
-        return next(new Error("All mandatory fields must be filled"));
-    }
-    if (!admin.isModified("password")) {
-        return next();
-    }
-    try {
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(admin.password, salt);
-        admin.password = hash;
-        next();
-    } catch (err) {
-        return next(err);
-    }
-});
+// adminSchema.pre("save", async function (next) {
+//     const admin = this;
+//     if (!this.firstName || !this.lastName || !this.email || !this.password) {
+//         return next(new Error("All mandatory fields must be filled"));
+//     }
+//     if (!admin.isModified("password")) {
+//         return next();
+//     }
+//     try {
+//         const salt = await bcrypt.genSalt(10);
+//         const hash = await bcrypt.hash(admin.password, salt);
+//         admin.password = hash;
+//         next();
+//     } catch (err) {
+//         return next(err);
+//     }
+// });
 
-adminSchema.methods.encryptPassword = async function (password) {
-    try {
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(password, salt);
-        return hash;
-    } catch (error) {
-        throw error;
-    }
-};
+// adminSchema.methods.encryptPassword = async function (password) {
+//     try {
+//         const salt = await bcrypt.genSalt(10);
+//         const hash = await bcrypt.hash(password, salt);
+//         return hash;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
 
-adminSchema.methods.comparePassword = async function (candidatePassword) {
-    try {
-        console.log('----------------password', this.password);
-        // @ts-ignore
-        const isMatch = await bcrypt.compare(candidatePassword, this.password);
-        return isMatch;
-    } catch (error) {
-        throw error;
-    }
-};
+// adminSchema.methods.comparePassword = async function (candidatePassword) {
+//     try {
+//         console.log('----------------password', this.password);
+//         // @ts-ignore
+//         const isMatch = await bcrypt.compare(candidatePassword, this.password);
+//         return isMatch;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
 
 const AdminModel = db.model("admins", adminSchema);
 module.exports = AdminModel;

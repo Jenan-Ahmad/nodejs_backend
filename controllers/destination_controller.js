@@ -1171,7 +1171,6 @@ exports.getAddedDestinations = async (req, res, next) => {
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
-        console.log(req.body);
         const { filter } = req.body;
         let destinations;
         if (filter === 'all') {
