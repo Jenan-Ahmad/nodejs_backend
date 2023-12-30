@@ -170,8 +170,11 @@ exports.deleteSuggestion = async (req, res, next) => {
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
-        console.log(req.params);
         const suggestionId = req.params.suggestionId;
+        const suggestion = await SuggestionService.getSuggestionById(suggestionId);
+        if (!suggestion) {
+            return res.status(500).json({ error: 'Attempt to delete non-existant suggestion' });
+        }
         const updated = await SuggestionService.markAsSeen(suggestionId);
         if (!updated) {
             return res.status(500).json({ error: 'Failed to delete the suggestion' });
@@ -194,6 +197,10 @@ exports.addComment = async (req, res, next) => {
             return res.status(500).json({ error: 'User does not exist' });
         }
         const { suggestionId, adminComment } = req.body;
+        const suggestion = await SuggestionService.getSuggestionById(suggestionId);
+        if (!suggestion) {
+            return res.status(500).json({ error: 'Attempt to delete non-existant suggestion' });
+        }
         const updated = await SuggestionService.addComment(suggestionId, adminComment, admin.email);
         if (!updated) {
             return res.status(500).json({ error: 'Failed to add a comment to the suggestion' });

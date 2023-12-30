@@ -35,6 +35,15 @@ class SuggestionService {
         }
     }
 
+    static async getSuggestionById(suggestionId) {
+        try {
+            return await SuggestionModel.findOne({ _id: suggestionId });
+        } catch (err) {
+            console.log(err);
+            throw new Error('An error occurred while retrieving the suggestion by id');
+        }
+    }
+
     static async deleteSuggestion(destId) {
         try {
             return await SuggestionModel.deleteOne({ _id: destId });

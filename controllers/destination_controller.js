@@ -1182,6 +1182,7 @@ exports.getAddedDestinations = async (req, res, next) => {
         }
         const destinationsList = await Promise.all(destinations.map(async (destination) => {
             return {
+                id: destination._id,
                 name: destination.name,
                 image: destination.images.mainImage,
                 city: destination.location.address,

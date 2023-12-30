@@ -35,3 +35,4 @@ exports.addNewAdmin = async (req, res, next) => {
     }
 
 };
+
