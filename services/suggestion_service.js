@@ -49,7 +49,7 @@ class SuggestionService {
             return await SuggestionModel.deleteOne({ _id: destId });
         } catch (err) {
             console.log(err);
-            throw new Error('An error occurred while deleting the plan');
+            throw new Error('An error occurred while deleting the suggestion');
         }
     }
 

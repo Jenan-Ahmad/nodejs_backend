@@ -114,6 +114,10 @@ exports.deleteDestination = async (req, res, next) => {
             return res.status(500).json({ error: 'User does not exist' });
         }
         const destId = req.params.destId;
+        const suggestion = await SuggestionService.getSuggestionById(destId);
+        if (!suggestion) {
+            return res.status(500).json({ error: 'Attempt to delete non-existant suggestion' });
+        }
         const deleted = await SuggestionService.deleteSuggestion(destId);
         if (!deleted) {
             return res.status(404).json({ error: 'Destination was not found' });

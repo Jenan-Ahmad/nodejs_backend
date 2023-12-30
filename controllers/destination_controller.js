@@ -1197,6 +1197,65 @@ exports.getAddedDestinations = async (req, res, next) => {
     }
 };
 
+exports.deleteAddedDestination = async (req, res, next) => {
+    console.log("------------------Delete Added Destination------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const destinationId = req.params.destinationId;
+        const destination = await DestinationService.getDestinationById(destinationId);
+        if (!destination) {
+            return res.status(500).json({ error: 'The destination you are trying to delete does not exist' });
+        }
+        const deleteDestination = await DestinationService.deleteDestinationById(destinationId);
+        if (!deleteDestination) {
+            return res.status(500).json({ error: 'The destination you are trying to delete does not exist' });
+        }
+        return res.status(200).json({ message: 'The destination was deleted successfullys' });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to get added destinations' });
+    }
+};
+
+exports.getDestinationInfo = async (req, res, next) => {
+    console.log("------------------Get Destination Info------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationId } = req.body;
+        const destination = await DestinationService.getDestinationById(destinationId);
+        if (!destination) {
+            return res.status(500).json({ error: 'The destination you are trying to view does not exist' });
+        }
+        const destinationMap = {
+            destID: destination._id, imagesURLs: [destination.images.mainImage, ...destination.images.descriptiveImages],
+            destinationName: destination.name, city: destination.location.address, category: destination.category,
+            budget: destination.budget, timeToSpend: destination.estimatedDuration.displayedDuration,
+            sheltered: destination.sheltered, about: destination.description,
+            latitude: destination.location.latitude, longitude: destination.location.longitude,
+            openingTime: destination.workingHours.openingTime, closingTime: destination.workingHours.closingTime,
+            selectedWorkingDays: destination.workingHours.workingdays, visitorTypes: destination.visitorsType,
+            ageCategories: destination.ageCategory, selectedServices: destination.services,
+            addedActivities: destination.activityList, geoTags: destination.geotags
+        };
+        return res.status(200).json({ destinationMap: destinationMap });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to get the destination\'s info' });
+    }
+};
+
 //might be deleted
 exports.getWeather = async (req, res, next) => {
     try {

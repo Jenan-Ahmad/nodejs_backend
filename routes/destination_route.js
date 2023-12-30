@@ -30,7 +30,8 @@ destinationRouter.post('/approve-an-upload', DestinationController.approveAnUplo
 destinationRouter.post('/reject-all-uplaods', DestinationController.rejectAllUplaods);
 destinationRouter.post('/reject-an-upload', DestinationController.rejectAnUpload);
 destinationRouter.post('/get-added-destinations', DestinationController.getAddedDestinations);
-
+destinationRouter.post('/delete-added-destination/:destinationId', DestinationController.deleteAddedDestination);
+destinationRouter.post('/get-destination-info', DestinationController.getDestinationInfo);
 
 destinationRouter.post('/get-weather', DestinationController.getWeather);
 module.exports = destinationRouter;

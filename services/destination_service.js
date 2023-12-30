@@ -33,6 +33,15 @@ class DestinationService {
     }
   }
 
+  static async getDestinationById(destinationId) {
+    try {
+      return await DestinationModel.findOne({ _id: destinationId });
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while retrieving the destination by id');
+    }
+  }
+
   static async getDestinationsInCity(city) {
     try {
       return await DestinationModel.find({ 'location.address': { $regex: new RegExp(city, 'i') } });
@@ -560,6 +569,15 @@ class DestinationService {
     } catch (err) {
       console.log(err);
       throw new Error('An error occurred while retrieving the destination by category');
+    }
+  }
+
+  static async deleteDestinationById(destinationId) {
+    try {
+      return await DestinationModel.deleteOne({ _id: destinationId });
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while deleting the destination');
     }
   }
 
