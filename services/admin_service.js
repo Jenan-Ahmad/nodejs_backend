@@ -684,6 +684,35 @@ class AdminService {
 
     }
 
+    static async editDestination(
+        name, description, activityList, longitude,
+        latitude, address, category, services, geotags,
+        contact, budget, workingHours, displayedDuration,
+        visitorsType, ageCategory, sheltered, mainImage, descriptiveImages, date, addedBy
+    ) {
+        try {
+            const location = { longitude, latitude, address }
+            const estimatedDuration = { displayedDuration };
+            return await DestinationModel.updateOne(
+                { name: name },
+                {
+                    $set: {
+                        description: description, activityList: activityList, location: location,
+                        category: category, services: services, geotags: geotags, contact: contact,
+                        budget: budget, workingHours: workingHours, estimatedDuration: estimatedDuration,
+                        visitorsType: visitorsType, ageCategory: ageCategory, sheltered: sheltered,
+                        'images.mainImage': mainImage, 'images.descriptiveImages': descriptiveImages, date: date,
+                        addedBy: addedBy
+                    },
+                }
+            );
+        } catch (error) {
+            console.log(error);
+            throw new Error("An error occurred editing the destination");
+        }
+
+    }
+
     static async addAdmin(firstName, lastName, email, password) {
         try {
             const newAdmin = 'true';

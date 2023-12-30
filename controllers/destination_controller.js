@@ -810,10 +810,12 @@ exports.addDestination = async (req, res, next) => {
             if (!admin) {
                 return res.status(500).json({ message: "User does not exist" });
             }
-            const { destinationName } = req.body;
+            const { destinationName, edited } = req.body;
             const existDestination = await DestinationService.getDestinationByName(destinationName);
             if (existDestination) {
-                return res.status(500).json({ message: "Destination already exists" });
+                if (edited === 'false') {
+                    return res.status(500).json({ message: "Destination already exists" });
+                }
             }
             const { about, activities, longitude,
                 latitude, city, category, services, otherServices, geoTags,
@@ -833,7 +835,7 @@ exports.addDestination = async (req, res, next) => {
                         contentType: file.mimetype,
                         cacheControl: "public, max-age=31536000"
                     };
-                    const folder = 'destinations_images'; // Specify your desired folder name
+                    const folder = 'destinations_images';
                     const fileName = `${folder}/${file.originalname}`;
                     const blob = bucket.file(fileName);
                     const blobStream = blob.createWriteStream({
@@ -865,17 +867,30 @@ exports.addDestination = async (req, res, next) => {
             const otherServicesList = JSON.parse(otherServices);
             const combinedServicesList = [...servicesList, ...otherServicesList];
             const servicesObjects = combinedServicesList.map(service => ({ name: service }));
-            const destination = await AdminService.addDestination(
-                destinationName, about, activityList, longitude,
-                latitude, city, category, servicesObjects, geotagsList,
-                contact, budget, workingHours, displayedDuration,
-                visitorTypesList, ageCategoriesList, sheltered, imageUrls[0], imageUrls.slice(1), date, admin.email
-            )
+            if (edited === "true") {
+                const destination = await AdminService.editDestination(
+                    destinationName, about, activityList, longitude,
+                    latitude, city, category, servicesObjects, geotagsList,
+                    contact, budget, workingHours, displayedDuration,
+                    visitorTypesList, ageCategoriesList, sheltered, imageUrls[0], imageUrls.slice(1), date, admin.email
+                )
+            } else {
+                const destination = await AdminService.addDestination(
+                    destinationName, about, activityList, longitude,
+                    latitude, city, category, servicesObjects, geotagsList,
+                    contact, budget, workingHours, displayedDuration,
+                    visitorTypesList, ageCategoriesList, sheltered, imageUrls[0], imageUrls.slice(1), date, admin.email
+                )
+            }
             return res.status(200).json({ message: "Destination added successfully" });
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ error: "Failed to add destination" });
+        let failType = 'add';
+        if (edited === 'true') {
+            failType = 'edit'
+        }
+        return res.status(500).json({ error: `Failed to ${failType} destination` });
     }
 };
 

@@ -196,7 +196,6 @@ exports.updateProfile = async (req, res, next) => {
           throw new Error('User does not exist');
         }
         return res.status(200).json({ message: 'updated' });
-        // return res.status(400).send("No image");
       }
       const metadata = {
         metadata: {
