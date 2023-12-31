@@ -101,6 +101,7 @@ exports.getDestinationDetails = async (req, res, next) => {
     console.log("------------------Get Destination Details------------------");
     //increment numofviewedtimes
     try {
+        let isAdmin = 0;
         const token = req.headers.authorization.split(' ')[1];
         const touristData = await TouristService.getEmailFromToken(token);
         const tourist = await TouristService.getTouristByEmail(touristData.email);
@@ -110,15 +111,18 @@ exports.getDestinationDetails = async (req, res, next) => {
             if (!admin) {
                 return res.status(500).json({ error: 'User does not exist' });
             }
+            isAdmin = 1;
         }
         const { destinationName } = req.body;
         const destination = await DestinationService.getDestinationByName(destinationName);
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
-        const incrDone = await DestinationService.incrementViewedTimes(destinationName);
-        if (!incrDone) {
-            return res.status(500).json({ error: 'Failed to load the destination' });
+        if (isAdmin === 0) {
+            const incrDone = await DestinationService.incrementViewedTimes(destinationName);
+            if (!incrDone) {
+                return res.status(500).json({ error: 'Failed to load the destination' });
+            }
         }
         const destinationImages = destination.images.descriptiveImages.map(image => ({
             image: image,
