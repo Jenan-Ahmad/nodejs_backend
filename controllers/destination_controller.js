@@ -6,8 +6,14 @@ const admin = require("../config/fb");
 const bucket = admin.storage().bucket();//firebase storage bucket
 const multer = require('multer');
 const uuid = require('uuid-v4');
+const crypto = require('crypto');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
+function generateImageHash(imageBuffer) {
+    const hash = crypto.createHash('md5').update(imageBuffer).digest('hex');
+    return hash;
+}
 
 exports.getRecommendedDestinations = async (req, res, next) => {
     console.log("------------------Get Recommended Destinations------------------");
@@ -99,20 +105,21 @@ exports.getDestinationDetails = async (req, res, next) => {
         const touristData = await TouristService.getEmailFromToken(token);
         const tourist = await TouristService.getTouristByEmail(touristData.email);
         if (!tourist) {
-            return res.status(500).json({ error: 'User does not exist' });
+            const adminData = await AdminService.getEmailFromToken(token);
+            const admin = await AdminService.getAdminByEmail(adminData.email);
+            if (!admin) {
+                return res.status(500).json({ error: 'User does not exist' });
+            }
         }
-        //list of images
         const { destinationName } = req.body;
         const destination = await DestinationService.getDestinationByName(destinationName);
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
-        //increment number of viewed times
         const incrDone = await DestinationService.incrementViewedTimes(destinationName);
         if (!incrDone) {
             return res.status(500).json({ error: 'Failed to load the destination' });
         }
-        // const destinationImages = destination.images?.descriptiveImages;
         const destinationImages = destination.images.descriptiveImages.map(image => ({
             image: image,
         }));
@@ -868,6 +875,8 @@ exports.addDestination = async (req, res, next) => {
             const combinedServicesList = [...servicesList, ...otherServicesList];
             const servicesObjects = combinedServicesList.map(service => ({ name: service }));
             if (edited === "true") {
+                const hash = generateImageHash(imageBuffer);
+
                 const destination = await AdminService.editDestination(
                     destinationName, about, activityList, longitude,
                     latitude, city, category, servicesObjects, geotagsList,
