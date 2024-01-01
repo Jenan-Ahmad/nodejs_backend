@@ -8,6 +8,7 @@ const fs = require('fs');
 const axios = require('axios');
 const multer = require('multer');
 const uuid = require('uuid-v4');
+const path = require('path');
 const crypto = require('crypto');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -852,6 +853,7 @@ exports.addDestination = async (req, res, next) => {
                 return res.status(500).json({ message: "The destination was not added" });
             }
             const imageUrls = [];
+            const imageUrlsEdit = [];
             for (const file of req.files) {
                 await new Promise((resolve, reject) => {
                     const metadata = {
@@ -875,7 +877,9 @@ exports.addDestination = async (req, res, next) => {
                     blobStream.on("finish", async () => {
                         const fileUrl = `${folder}%2F${file.originalname}`;
                         const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${fileUrl}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
+                        const imageUrlEdit = `gs://touristine-9a51a.appspot.com/destinations_images/${file.originalname}`;
                         imageUrls.push(imageUrl);
+                        imageUrlsEdit.push(imageUrlEdit);
                         resolve();
                     });
                     blobStream.end(file.buffer);
@@ -895,8 +899,9 @@ exports.addDestination = async (req, res, next) => {
             const servicesObjects = combinedServicesList.map(service => ({ name: service }));
             if (edited === "true") {
                 const uploadedHash = await Promise.all(imageUrls.map(generateHash));
-                const originalHash = await Promise.all([...existDestination.images.mainImage, ...existDestination.images.descriptiveImages].map(generateHash));
-                const { markedArray1, markedArray2 } = markCommonElements(uploadedHash, originalHash);
+                const totalImages = [existDestination.images.mainImage, ...existDestination.images.descriptiveImages];
+                const originalHash = await Promise.all(totalImages.map(generateHash));
+                const { markedArray2, markedArray1 } = markCommonElements(uploadedHash, originalHash);
                 const finalImages = [];
                 if (markedArray1[0].status === 'common') {
                     finalImages.push(existDestination.images.mainImage);
@@ -908,13 +913,16 @@ exports.addDestination = async (req, res, next) => {
                 }
                 for (let i = 0; i < markedArray2.length; i++) {
                     if (markedArray2[i].status === 'common') {
-                        const file = bucket.file(imageUrls[i]);
-                        const exists = await file.exists();
-                        if (exists[0]) {
+                        const filename = path.basename(imageUrlsEdit[i]);
+                        console.log(filename);
+                        const filePath = `destinations_images/${filename}`;
+                        console.log(filePath);
+                        const file = bucket.file(filePath);
+                        try {
                             await file.delete();
-                            console.log(`Image ${imageUrls[i]} deleted successfully.`);
-                        } else {
-                            console.log(`Image ${imageUrls[i]} does not exist.`);
+                            console.log(`Image ${imageUrlsEdit[i]} deleted successfully.`);
+                        } catch (error) {
+                            console.error(`Error deleting image ${imageUrlsEdit[i]}:`, error.message);
                         }
                     } else {
                         finalImages.push(imageUrls[i]);
