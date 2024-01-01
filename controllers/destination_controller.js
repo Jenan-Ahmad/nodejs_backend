@@ -4,16 +4,13 @@ const DestinationService = require("../services/destination_service");
 const PlanService = require("../services/plan_service");
 const admin = require("../config/fb");
 const bucket = admin.storage().bucket();//firebase storage bucket
+const fs = require('fs');
+const axios = require('axios');
 const multer = require('multer');
 const uuid = require('uuid-v4');
 const crypto = require('crypto');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-
-function generateImageHash(imageBuffer) {
-    const hash = crypto.createHash('md5').update(imageBuffer).digest('hex');
-    return hash;
-}
 
 exports.getRecommendedDestinations = async (req, res, next) => {
     console.log("------------------Get Recommended Destinations------------------");
@@ -99,7 +96,6 @@ exports.getOtherDestinations = async (req, res, next) => {
 
 exports.getDestinationDetails = async (req, res, next) => {
     console.log("------------------Get Destination Details------------------");
-    //increment numofviewedtimes
     try {
         let isAdmin = 0;
         const token = req.headers.authorization.split(' ')[1];
@@ -810,6 +806,25 @@ exports.getRatings = async (req, res, next) => {
 
 };
 
+async function generateHash(imageUrl) {
+    try {
+        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        const hash = crypto.createHash('sha256');
+        hash.update(response.data);
+        return hash.digest('hex');
+    } catch (error) {
+        console.error(`Error fetching or hashing image from ${imageUrl}:`, error.message);
+        return null;
+    }
+}
+
+function markCommonElements(arr1, arr2) {
+    const markedArray1 = arr1.map((el, index) => ({ image: el, status: arr2.includes(el) ? 'common' : 'not common' }));
+    const markedArray2 = arr2.map((el, index) => ({ image: el, status: arr1.includes(el) ? 'common' : 'not common' }));
+
+    return { markedArray1, markedArray2 };
+}
+
 exports.addDestination = async (req, res, next) => {
     console.log("------------------Add Destination------------------");
     try {
@@ -879,13 +894,37 @@ exports.addDestination = async (req, res, next) => {
             const combinedServicesList = [...servicesList, ...otherServicesList];
             const servicesObjects = combinedServicesList.map(service => ({ name: service }));
             if (edited === "true") {
-                const hash = generateImageHash(imageBuffer);
-
+                const uploadedHash = await Promise.all(imageUrls.map(generateHash));
+                const originalHash = await Promise.all([...existDestination.images.mainImage, ...existDestination.images.descriptiveImages].map(generateHash));
+                const { markedArray1, markedArray2 } = markCommonElements(uploadedHash, originalHash);
+                const finalImages = [];
+                if (markedArray1[0].status === 'common') {
+                    finalImages.push(existDestination.images.mainImage);
+                }
+                for (let i = 1; i < markedArray1.length; i++) {
+                    if (markedArray1[i].status === 'common') {
+                        finalImages.push(existDestination.images.descriptiveImages[i - 1]);
+                    }
+                }
+                for (let i = 0; i < markedArray2.length; i++) {
+                    if (markedArray2[i].status === 'common') {
+                        const file = bucket.file(imageUrls[i]);
+                        const exists = await file.exists();
+                        if (exists[0]) {
+                            await file.delete();
+                            console.log(`Image ${imageUrls[i]} deleted successfully.`);
+                        } else {
+                            console.log(`Image ${imageUrls[i]} does not exist.`);
+                        }
+                    } else {
+                        finalImages.push(imageUrls[i]);
+                    }
+                }
                 const destination = await AdminService.editDestination(
                     destinationName, about, activityList, longitude,
                     latitude, city, category, servicesObjects, geotagsList,
                     contact, budget, workingHours, displayedDuration,
-                    visitorTypesList, ageCategoriesList, sheltered, imageUrls[0], imageUrls.slice(1), date, admin.email
+                    visitorTypesList, ageCategoriesList, sheltered, finalImages[0], finalImages.slice(1), date, admin.email
                 )
             } else {
                 const destination = await AdminService.addDestination(
