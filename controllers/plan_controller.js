@@ -148,10 +148,10 @@ exports.storePlan = async (req, res, next) => {
                     placeName: "Break",
                     startTime: `${crntTime < 10 ? '0' : ''}${crntTime}:00`,
                     endTime: `${crntTime + 1 < 10 ? '0' : ''}${crntTime + 1}:00`,
-                    activityList: {
+                    activityList: [{
                         title: "Nature Walk",
                         description: "Discover hidden gems, street art, and unique local shops.",
-                    },
+                    }],
                     imagePath: "https://firebasestorage.googleapis.com/v0/b/touristine-9a51a.appspot.com/o/cities%2Fgrey%20vertical.png?alt=media&token=35e04e30-fbba-43ab-9269-d201c53c3bfe",
                     latitude: "0",
                     longitude: "0",

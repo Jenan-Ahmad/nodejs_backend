@@ -416,7 +416,7 @@ class PlanService {
             const j = Math.floor(Math.random() * (i + 1));
             [categoryNames[i], categoryNames[j]] = [categoryNames[j], categoryNames[i]];
         }
-        console.log("----------------------------------------------", crntTime);
+        console.log("----------------------------------------------", crntTime, convertTimeStringToDate(endTime).getHours());
         if (crntTime > convertTimeStringToDate(endTime).getHours() + 1) {
             return planDestinations;
         }
