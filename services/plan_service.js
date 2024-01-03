@@ -447,7 +447,9 @@ class PlanService {
         switch (city.toLowerCase()) {
             case "ramallah":
                 return "https://firebasestorage.googleapis.com/v0/b/touristine-9a51a.appspot.com/o/cities%2Framallah.jpeg?alt=media&token=c0477916-b960-401a-ab9f-6908cd1c5588";
-        }
+            default:
+                return "https://firebasestorage.googleapis.com/v0/b/touristine-9a51a.appspot.com/o/cities%2Fgrey%20vertical.png?alt=media&token=35e04e30-fbba-43ab-9269-d201c53c3bfe"
+            }
     }
 
     static async getHour(time) {
