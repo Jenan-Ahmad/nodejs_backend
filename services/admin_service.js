@@ -765,6 +765,15 @@ class AdminService {
             throw new Error("An error occurred updating your new admin status");
         }
     }
+
+    static async updateProfile(firstName, lastName, email, password, imageUrl) {
+        try {
+            const admin = new AdminModel();
+            return AdminModel.updateOne({ email: email }, { $set: { firstName: firstName, lastName: lastName, password: password, profileImage: imageUrl } });
+        } catch (error) {
+            throw new Error("An error occurred updating your profile");
+        }
+    }
 }
 
 module.exports = AdminService;    

@@ -184,14 +184,24 @@ exports.updateProfile = async (req, res, next) => {
       if (!req.file) {
         console.log("no image");
         const { firstName, lastName, password } = req.body;
-
         const token = req.headers.authorization.split(' ')[1];
         const touristData = await TouristService.getEmailFromToken(token);
         const tourist = await TouristService.getTouristByEmail(touristData.email);
+        let adminData;
+        let admin;
         if (!tourist) {
-          throw new Error('User does not exist');
+          adminData = await AdminService.getEmailFromToken(token);
+          admin = await AdminService.getAdminByEmail(adminData.email);
+          if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+          }
         }
-        const updatedUser = await TouristService.updateProfile(firstName, lastName, touristData.email, password, touristData.profileImage);
+        let updatedUser;
+        if (tourist) {
+          updatedUser = await TouristService.updateProfile(firstName, lastName, touristData.email, password, touristData.profileImage);
+        } else {
+          updatedUser = await AdminService.updateProfile(firstName, lastName, adminData.email, password, adminData.profileImage);
+        }
         if (!updatedUser) {
           throw new Error('User does not exist');
         }
@@ -219,14 +229,24 @@ exports.updateProfile = async (req, res, next) => {
         const fileUrl = `${folder}%2F${req.file.originalname}`;
         const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${fileUrl}?alt=media&token=${metadata.metadata.firebaseStorageDownloadTokens}`;
         const { firstName, lastName, password } = req.body;
-
         const token = req.headers.authorization.split(' ')[1];
         const touristData = await TouristService.getEmailFromToken(token);
         const tourist = await TouristService.getTouristByEmail(touristData.email);
+        let adminData;
+        let admin;
         if (!tourist) {
-          throw new Error('User does not exist');
+          adminData = await AdminService.getEmailFromToken(token);
+          admin = await AdminService.getAdminByEmail(adminData.email);
+          if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+          }
         }
-        const updatedUser = await TouristService.updateProfile(firstName, lastName, touristData.email, password, imageUrl);
+        let updatedUser;
+        if (tourist) {
+          updatedUser = await TouristService.updateProfile(firstName, lastName, touristData.email, password, imageUrl);
+        } else {
+          updatedUser = await AdminService.updateProfile(firstName, lastName, adminData.email, password, imageUrl);
+        }
         if (!updatedUser) {
           throw new Error('User does not exist');
         }
