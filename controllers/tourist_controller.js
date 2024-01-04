@@ -358,3 +358,28 @@ exports.fetchLocation = async (req, res, next) => {
     return res.status(500).json({ error: 'Couldn\'t fetch your location' });
   }
 };
+
+exports.getTouristsInfo = async (req, res, next) => {
+  console.log("------------------Add New Admin------------------");
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const adminData = await AdminService.getEmailFromToken(token);
+    const admin = await AdminService.getAdminByEmail(adminData.email);
+    if (!admin) {
+      return res.status(500).json({ error: 'User does not exist' });
+    }
+    const { touristsEmails } = req.body;
+    const touristsEmailsList = JSON.parse(touristsEmails);
+    const touristsList = await TouristService.getTouristsData(touristsEmailsList);
+    const tourists = touristsList.map(tourist => ({
+      firstName: tourist.firstName,
+      lastName: tourist.lastName,
+      email: tourist.email,
+      image: tourist.profileImage
+    }));
+    return res.status(200).json({ tourists: tourists });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Failed to get tourists data" });
+  }
+};

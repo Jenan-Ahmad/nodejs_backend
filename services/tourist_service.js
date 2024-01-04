@@ -201,6 +201,15 @@ class TouristService {
     });
   }
 
+  static async getTouristsData(touristsEmailsList) {
+    try {
+      return await TouristModel.find({ email: { $in: touristsEmailsList } });
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while retrieving tourists by their emails.');
+    }
+  }
+
 }
 
 module.exports = TouristService;

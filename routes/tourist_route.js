@@ -16,6 +16,8 @@ touristRouter.post('/location-accquistion', TouristController.updateLocation);
 touristRouter.post('/interests-filling', TouristController.updateInterests);
 touristRouter.post('/get-interests', TouristController.fetchInterests);
 touristRouter.post('/get-location', TouristController.fetchLocation);
+touristRouter.post('/get-tourists-info', TouristController.getTouristsInfo);
+
 touristRouter.get('/', (req, res) => {
   res.status(200).json({ status: true, success: "connected now" });
 });
