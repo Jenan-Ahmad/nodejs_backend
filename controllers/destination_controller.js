@@ -437,6 +437,9 @@ exports.getUploadedImages = async (req, res, next) => {
         const token = req.headers.authorization.split(' ')[1];
         const touristData = await TouristService.getEmailFromToken(token);
         const tourist = await TouristService.getTouristByEmail(touristData.email);
+        if (!tourist) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
         const { destinationName } = req.body;
         const destination = await DestinationService.getDestinationByName(destinationName);
         if (!destination) {
@@ -461,6 +464,9 @@ exports.deleteUploadedImages = async (req, res, next) => {
         const token = req.headers.authorization.split(' ')[1];
         const touristData = await TouristService.getEmailFromToken(token);
         const tourist = await TouristService.getTouristByEmail(touristData.email);
+        if (!tourist) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
         const uploadedImagesId = req.params.uploadedImagesId;
         const { destinationName } = req.body;
         const destination = await DestinationService.getDestinationByName(destinationName);
@@ -485,6 +491,9 @@ exports.searchDestination = async (req, res, next) => {
         const token = req.headers.authorization.split(' ')[1];
         const touristData = await TouristService.getEmailFromToken(token);
         const tourist = await TouristService.getTouristByEmail(touristData.email);
+        if (!tourist) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
         const { searchTerm, isBudgetFriendly, isMidRange, isLuxurious, Sheltered } = req.body;
         const FSearchTerm = searchTerm.trim();
         const destinations = await DestinationService.searchDestinations(FSearchTerm, isBudgetFriendly, isMidRange, isLuxurious, Sheltered);

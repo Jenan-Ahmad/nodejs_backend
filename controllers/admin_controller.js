@@ -36,3 +36,26 @@ exports.addNewAdmin = async (req, res, next) => {
 
 };
 
+exports.getAdminsData = async (req, res, next) => {
+    console.log("------------------Get Admins Data------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const touristData = await TouristService.getEmailFromToken(token);
+        const tourist = await TouristService.getTouristByEmail(touristData.email);
+        if (!tourist) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const adminsList = await AdminService.getAdminsData();
+        const admins = adminsList.map(admin => ({
+            firstName: admin.firstName,
+            lastName: admin.lastName,
+            email: admin.email,
+            image: admin.profileImage
+        }));
+        return res.status(200).json({ admins: admins });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to get admins data" });
+    }
+};
+

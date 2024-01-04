@@ -37,6 +37,15 @@ class AdminService {
         });
     }
 
+    static async getAdminsData() {
+        try {
+            return await AdminModel.find({});
+        } catch (err) {
+            console.log(err);
+            throw new Error('An error occurred while retrieving the admins.');
+        }
+    }
+
     static async getVisitsByCity() {
         try {
             const result = await DestinationModel.aggregate([
@@ -722,7 +731,7 @@ class AdminService {
             return true;
         } catch (error) {
             console.log(error);
-            throw new Error("An error occurred adding the new destination");
+            throw new Error("An error occurred adding the new admin");
         }
     }
 
