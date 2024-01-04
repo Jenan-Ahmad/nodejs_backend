@@ -230,21 +230,26 @@ class DestinationService {
         }
       });
       console.log("weather---------------");
-      if ((destination.category?.toLowerCase() != "historicalsites") && (destination.category?.toLowerCase() != "religiouslandmarks")) {
-        const weatherDetails = await this.getWeather(destination.location.address);
-        if (weatherDetails.toLowerCase().includes("rain")) {
-          //check for categories concerned with the weather
-          if (destination.sheltered === "true") {
-            points += 30;
+      const weatherWorks = await this.getWeather(destination.location.address);
+      console.log("Here is the weather:------------------", weatherWorks);
+      if (weatherWorks != "undefind + 00") {
+        if ((destination.category?.toLowerCase() != "historicalsites") && (destination.category?.toLowerCase() != "religiouslandmarks")) {
+          const weatherDetails = await this.getWeather(destination.location.address);
+          if (weatherDetails.toLowerCase().includes("rain")) {
+            //check for categories concerned with the weather
+            if (destination.sheltered === "true") {
+              points += 30;
+            } else {
+              points -= 30;
+            }
           } else {
-            points -= 30;
+            points += 10;
           }
         } else {
           points += 10;
         }
-      } else {
-        points += 10;
       }
+
       console.log("services---------------");
       destination.services?.forEach(service => {
         switch (service.name.toLowerCase()) {

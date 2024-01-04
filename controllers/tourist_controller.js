@@ -228,14 +228,10 @@ exports.updateProfile = async (req, res, next) => {
         const token = req.headers.authorization.split(' ')[1];
         const touristData = await TouristService.getEmailFromToken(token);
         const tourist = await TouristService.getTouristByEmail(touristData.email);
-        let adminData;
-        let admin;
-        if (!tourist) {
-          adminData = await AdminService.getEmailFromToken(token);
-          admin = await AdminService.getAdminByEmail(adminData.email);
-          if (!admin) {
-            return res.status(500).json({ error: 'User does not exist' });
-          }
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!tourist && !admin) {
+          return res.status(500).json({ error: 'User does not exist' });
         }
         let updatedUser;
         if (tourist) {
