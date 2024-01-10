@@ -211,6 +211,16 @@ class TouristService {
     }
   }
 
+  static async updateTouristDeviceToken(email, deviceToken) {
+    try {
+        const tourist = new TouristModel();
+        return TouristModel.updateOne({ email: email }, { $set: { deviceToken: deviceToken } });
+    } catch (error) {
+        console.error(error);
+        throw new Error("An error occurred updating your new devide token");
+    }
+}
+
 }
 
 module.exports = TouristService;

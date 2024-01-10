@@ -81,7 +81,7 @@ exports.login = async (req, res, next) => {
   console.log("------------------Log In------------------");
   console.log("---req body---", req.body);
   try {
-    const { email, password } = req.body;
+    const { email, password, deviceToken } = req.body;
     if (!email || !password) {
       return res.status(500).json({ error: 'All fields must be filled' });
     }
@@ -103,6 +103,10 @@ exports.login = async (req, res, next) => {
           return res.status(500).json({ error: 'Login Failed' });
         }
       }
+      const updateAdminDeviceToken = await AdminService.updateAdminDeviceToken(email, deviceToken);
+      if (!updateAdminDeviceToken) {
+        return res.status(500).json({ error: 'Login Failed' });
+      }
       const token = await TouristService.generateAccessToken(tokenData, "secret", "1d");
       return res.status(200).json({ status: true, success: "sendData", token: token, firstName: admin.firstName, lastName: admin.lastName, password: password, profileImage: admin.profileImage, newAdmin: isNewAdmin, type: 200 });//type 200->admin
     } else {//if tourist
@@ -112,6 +116,10 @@ exports.login = async (req, res, next) => {
       }
       // Creating Token
       const tokenData = { email: tourist.email };
+      const updateTouristDeviceToken = await TouristService.updateTouristDeviceToken(email, deviceToken);
+      if (!updateTouristDeviceToken) {
+        return res.status(500).json({ error: 'Login Failed' });
+      }
       const token = await TouristService.generateAccessToken(tokenData, "secret", "1d");
       return res.status(200).json({ status: true, success: "sendData", token: token, firstName: tourist.firstName, lastName: tourist.lastName, password: password, profileImage: tourist.profileImage, type: 100 });//type 100->tourist
     }
