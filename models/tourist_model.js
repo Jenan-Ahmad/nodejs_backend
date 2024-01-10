@@ -120,6 +120,9 @@ const touristSchema = new mongoose.Schema({
   googleAccount: {
     type: String,
   },
+  deviceToken: {
+    type: String,
+  },
 });
 
 // Middleware to hash the password before saving it

@@ -11,8 +11,8 @@ exports.signup = async (req, res, next) => {
   try {
     console.log("------------------Sign Up------------------");
     console.log("---req body---", req.body);
-    const { firstName, lastName, email, password } = req.body;
-    if (!firstName || !lastName || !email || !password) {
+    const { firstName, lastName, email, password, deviceToken } = req.body;
+    if (!firstName || !lastName || !email || !password || !deviceToken) {
       return res.status(409).json({ message: "All mandatory fields must be filled" });
     }
     const duplicate = await TouristService.getTouristByEmail(email);
@@ -24,7 +24,8 @@ exports.signup = async (req, res, next) => {
         firstName: firstName,
         lastName: lastName,
         email: email,
-        password: password
+        password: password,
+        deviceToken: deviceToken
       }, "secret", "1h")
       //token sent to the user for their session
       const token = await TouristService.generateAccessToken({
@@ -44,14 +45,14 @@ exports.register = async (req, res, next) => {
     console.log("------------------Register------------------");
     const token = req.query.token;
     const touristData = await TouristService.getInfoFromToken(token);
-    if (!touristData.firstName || !touristData.lastName || !touristData.email || !touristData.password) {
+    if (!touristData.firstName || !touristData.lastName || !touristData.email || !touristData.password || !touristData.deviceToken) {
       return res.status(409).json({ message: "All mandatory fields must be filled" });
     }
     const duplicate = await TouristService.getTouristByEmail(touristData.email);
     if (duplicate) {
       return res.status(409).json({ message: 'User with this email already exists' });
     }
-    const response = await TouristService.registerTourist(token, touristData.firstName, touristData.lastName, touristData.email, touristData.password);
+    const response = await TouristService.registerTourist(token, touristData.firstName, touristData.lastName, touristData.email, touristData.password, touristData.deviceToken);
     return res.status(200).json({ message: 'User registered' });
   }
   catch (err) {

@@ -16,11 +16,12 @@ class TouristService {
     try {
 
       console.log(
-        "-----firstName-----lastName-----Email --- Password-----",
+        "-----firstName-----lastName-----Email --- Password-----deviceToken",
         firstName,
         lastName,
         email,
-        password
+        password,
+        deviceToken
       );
 
       jwt.verify(token, "secret", async function (err, decoded) {
@@ -29,7 +30,7 @@ class TouristService {
           throw new Error('Email verification failed, possibly the link is invalid or expired');
         }
         else {
-          const createTourist = new TouristModel({ firstName, lastName, email, password });
+          const createTourist = new TouristModel({ firstName, lastName, email, password, deviceToken });
           await createTourist.save();
         }
       });
@@ -180,8 +181,8 @@ class TouristService {
           reject('Invalid token');
         } else {
           // You can access user data from the 'decoded' object
-          const { firstName, lastName, email, password } = decoded;
-          resolve({ firstName, lastName, email, password });
+          const { firstName, lastName, email, password, deviceToken } = decoded;
+          resolve({ firstName, lastName, email, password, deviceToken });
         }
       });
     });

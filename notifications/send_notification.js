@@ -10,15 +10,14 @@ admin.initializeApp({
   projectId: "touristine-authentication",
 }, "fornoti");
 
-// Device token to which you want to send the notification
 const deviceToken = 'dB4tqsgrTrad4VAKHunHsJ:APA91bH2wppy5SuzOiBtEwSWjbkOHyiB7aGnuItSOOhGCpWIdzAUt3UNDrXN2j6-BlpONTBYUv8EkljgpdmE0GehhhddAODSn9HdZ6n4DDT-1Gfs0ntOhbCcbg7l0bH5qEseGsy0_P0o'; // Replace with the actual device token
 
-function sendNotification(deviceToken) {
+function sendNotification(deviceToken, nt_title, nt_body) {
   console.log('Sender ID:', admin.app("fornoti").options.messagingSenderId);
   const message = {
     notification: {
-      title: 'Hello from Node.js',
-      body: 'This is a notification sent from a Node.js server!',
+      title: nt_title,
+      body: nt_body,
     },
     token: deviceToken,
   };
