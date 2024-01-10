@@ -10,7 +10,7 @@ const upload = multer({ storage: storage });
 exports.signup = async (req, res, next) => {
   try {
     console.log("------------------Sign Up------------------");
-    console.log("---req body---", req.body);
+    console.log("---req body---", req.body);       
     const { firstName, lastName, email, password, deviceToken } = req.body;
     if (!firstName || !lastName || !email || !password || !deviceToken) {
       return res.status(409).json({ message: "All mandatory fields must be filled" });
@@ -31,7 +31,7 @@ exports.signup = async (req, res, next) => {
       const token = await TouristService.generateAccessToken({
         email: email
       }, "secret", "1d")
-      const emailverif = await TouristService.verifyEmail(vtoken, firstName, lastName, email, password);
+      const emailverif = await TouristService.verifyEmail(vtoken, firstName, lastName, email, password, deviceToken);
       return res.status(200).json({ message: "A verification email is sent to you", token: token });
     }
   } catch (err) {
@@ -56,6 +56,7 @@ exports.register = async (req, res, next) => {
     return res.status(200).json({ message: 'User registered' });
   }
   catch (err) {
+    console.log(err);
     return res.status(500).json({ error: err.message });
   }
 };

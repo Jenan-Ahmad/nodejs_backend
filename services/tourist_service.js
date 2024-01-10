@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 });
 
 class TouristService {
-  static async registerTourist(token, firstName, lastName, email, password) {
+  static async registerTourist(token, firstName, lastName, email, password, deviceToken) {
     try {
 
       console.log(
@@ -39,7 +39,7 @@ class TouristService {
     }
   }
 
-  static async verifyEmail(token, firstName, lastName, email, password) {
+  static async verifyEmail(token, firstName, lastName, email, password, deviceToken) {
     try {
 
       const verificationLink = `https://touristine.onrender.com/verify?token=${token}`;
