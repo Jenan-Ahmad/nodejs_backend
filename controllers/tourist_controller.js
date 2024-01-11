@@ -10,7 +10,7 @@ const upload = multer({ storage: storage });
 exports.signup = async (req, res, next) => {
   try {
     console.log("------------------Sign Up------------------");
-    console.log("---req body---", req.body);       
+    console.log("---req body---", req.body);
     const { firstName, lastName, email, password, deviceToken } = req.body;
     if (!firstName || !lastName || !email || !password || !deviceToken) {
       return res.status(409).json({ message: "All mandatory fields must be filled" });
@@ -103,9 +103,11 @@ exports.login = async (req, res, next) => {
           return res.status(500).json({ error: 'Login Failed' });
         }
       }
-      const updateAdminDeviceToken = await AdminService.updateAdminDeviceToken(email, deviceToken);
-      if (!updateAdminDeviceToken) {
-        return res.status(500).json({ error: 'Login Failed' });
+      if (deviceToken !== '0') {
+        const updateAdminDeviceToken = await AdminService.updateAdminDeviceToken(email, deviceToken);
+        if (!updateAdminDeviceToken) {
+          return res.status(500).json({ error: 'Login Failed' });
+        }
       }
       const token = await TouristService.generateAccessToken(tokenData, "secret", "1d");
       return res.status(200).json({ status: true, success: "sendData", token: token, firstName: admin.firstName, lastName: admin.lastName, password: password, profileImage: admin.profileImage, newAdmin: isNewAdmin, type: 200 });//type 200->admin
@@ -116,9 +118,11 @@ exports.login = async (req, res, next) => {
       }
       // Creating Token
       const tokenData = { email: tourist.email };
-      const updateTouristDeviceToken = await TouristService.updateTouristDeviceToken(email, deviceToken);
-      if (!updateTouristDeviceToken) {
-        return res.status(500).json({ error: 'Login Failed' });
+      if (deviceToken !== '0') {
+        const updateTouristDeviceToken = await TouristService.updateTouristDeviceToken(email, deviceToken);
+        if (!updateTouristDeviceToken) {
+          return res.status(500).json({ error: 'Login Failed' });
+        }
       }
       const token = await TouristService.generateAccessToken(tokenData, "secret", "1d");
       return res.status(200).json({ status: true, success: "sendData", token: token, firstName: tourist.firstName, lastName: tourist.lastName, password: password, profileImage: tourist.profileImage, type: 100 });//type 100->tourist
