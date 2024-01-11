@@ -1120,7 +1120,7 @@ exports.markComplaintAsSeen = async (req, res, next) => {
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
-        const complaint = destination.complaints.find(c => c._id.equals(ObjectId(complaintId)));
+        const complaint = destination.complaints.find(c => c._id.equals(complaintId));
         const tourist = await TouristService.getTouristByEmail(complaint.email);
         if (tourist.deviceToken !== '0') {
             sendNotification(tourist.deviceToken, 'Update on your complaint', 'Your complaint has been seen by the admins')
@@ -1194,7 +1194,7 @@ exports.approveAnUpload = async (req, res, next) => {
         if (!update1) {
             return res.status(500).json({ error: 'Approval Failed' });
         }
-        const upload = destination.images.pendingImages.find(p => p._id.equals(ObjectId(uploadId)));
+        const upload = destination.images.pendingImages.find(p => p._id.equals(uploadId));
         const tourist = await TouristService.getTouristByEmail(upload.email);
         if (tourist.deviceToken !== '0') {
             sendNotification(tourist.deviceToken, 'Update on your uploaded images', 'Your images were accepted\nThanks for sharing!')
@@ -1270,7 +1270,7 @@ exports.rejectAnUpload = async (req, res, next) => {
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
-        const upload = destination.images.pendingImages.find(p => p._id.equals(ObjectId(uploadId)));
+        const upload = destination.images.pendingImages.find(p => p._id.equals(uploadId));
         const tourist = await TouristService.getTouristByEmail(upload.email);
         if (tourist.deviceToken !== '0') {
             sendNotification(tourist.deviceToken, 'Update on your complaint', 'Your complaint has been seen by the admins')
