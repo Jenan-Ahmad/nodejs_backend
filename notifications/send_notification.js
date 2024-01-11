@@ -10,8 +10,6 @@ admin.initializeApp({
   projectId: "touristine-authentication",
 }, "fornoti");
 
-const deviceToken = 'dB4tqsgrTrad4VAKHunHsJ:APA91bH2wppy5SuzOiBtEwSWjbkOHyiB7aGnuItSOOhGCpWIdzAUt3UNDrXN2j6-BlpONTBYUv8EkljgpdmE0GehhhddAODSn9HdZ6n4DDT-1Gfs0ntOhbCcbg7l0bH5qEseGsy0_P0o'; // Replace with the actual device token
-
 function sendNotification(deviceToken, nt_title, nt_body) {
   console.log('Sender ID:', admin.app("fornoti").options.messagingSenderId);
   const message = {
@@ -21,7 +19,6 @@ function sendNotification(deviceToken, nt_title, nt_body) {
     },
     token: deviceToken,
   };
-
   return admin.app("fornoti").messaging().send(message);
 }
 

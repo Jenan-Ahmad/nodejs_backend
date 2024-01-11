@@ -12,6 +12,7 @@ const path = require('path');
 const crypto = require('crypto');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const sendNotification = require('../notifications/send_notification');
 
 exports.getRecommendedDestinations = async (req, res, next) => {
     console.log("------------------Get Recommended Destinations------------------");
@@ -1119,6 +1120,17 @@ exports.markComplaintAsSeen = async (req, res, next) => {
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
+        const complaint = destination.complaints.find(c => c._id.equals(ObjectId(complaintId)));
+        const tourist = await TouristService.getTouristByEmail(complaint.email);
+        if (tourist.deviceToken !== '0') {
+            sendNotification(tourist.deviceToken, 'Update on your complaint', 'Your complaint has been seen by the admins')
+                .then((response) => {
+                    console.log('Successfully sent message:', response);
+                })
+                .catch((error) => {
+                    console.error('Error sending message:', error);
+                });
+        }
         const update = await DestinationService.setSeen(destinationName, complaintId);
         if (!update) {
             return res.status(500).json({ error: 'Failed to update the complaint' });
@@ -1182,6 +1194,17 @@ exports.approveAnUpload = async (req, res, next) => {
         if (!update1) {
             return res.status(500).json({ error: 'Approval Failed' });
         }
+        const upload = destination.images.pendingImages.find(p => p._id.equals(ObjectId(uploadId)));
+        const tourist = await TouristService.getTouristByEmail(upload.email);
+        if (tourist.deviceToken !== '0') {
+            sendNotification(tourist.deviceToken, 'Update on your uploaded images', 'Your images were accepted\nThanks for sharing!')
+                .then((response) => {
+                    console.log('Successfully sent message:', response);
+                })
+                .catch((error) => {
+                    console.error('Error sending message:', error);
+                });
+        }
         const update2 = await DestinationService.approvePendingImages(destinationName, uploadId);
         if (!update2) {
             return res.status(500).json({ error: 'Approval Failed' });
@@ -1208,6 +1231,19 @@ exports.rejectAllUplaods = async (req, res, next) => {
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
+        const unseenImages = destination.images.pendingImages.filter(image => image.status.toLocaleLowerCase() === 'pending');
+        for (const image of unseenImages) {
+            const tourist = await TouristService.getTouristByEmail(image.email);
+            if (tourist.deviceToken !== '0') {
+                sendNotification(tourist.deviceToken, 'Update on your uploaded images', 'Your images were rejected\nGive it another shot!')
+                    .then((response) => {
+                        console.log('Successfully sent message:', response);
+                    })
+                    .catch((error) => {
+                        console.error('Error sending message:', error);
+                    });
+            }
+        }
         const update = await DestinationService.rejectAllPendingImages(destinationName);
         if (!update) {
             return res.status(500).json({ error: 'Rejection Failed' });
@@ -1233,6 +1269,17 @@ exports.rejectAnUpload = async (req, res, next) => {
         const destination = await DestinationService.getDestinationByName(destinationName);
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const upload = destination.images.pendingImages.find(p => p._id.equals(ObjectId(uploadId)));
+        const tourist = await TouristService.getTouristByEmail(upload.email);
+        if (tourist.deviceToken !== '0') {
+            sendNotification(tourist.deviceToken, 'Update on your complaint', 'Your complaint has been seen by the admins')
+                .then((response) => {
+                    console.log('Successfully sent message:', response);
+                })
+                .catch((error) => {
+                    console.error('Error sending message:', error);
+                });
         }
         const update = await DestinationService.rejectPendingImages(destinationName, uploadId);
         if (!update) {

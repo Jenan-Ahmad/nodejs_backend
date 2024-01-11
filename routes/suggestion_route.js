@@ -7,7 +7,7 @@ suggestionRouter.post('/store-destination', SuggestionController.storeDestinatio
 suggestionRouter.post('/get-uploaded-dests', SuggestionController.getUploadedDests);
 suggestionRouter.post('/delete-destination/:destId', SuggestionController.deleteDestination);
 suggestionRouter.post('/get-suggestions', SuggestionController.getSuggestions);
-suggestionRouter.post('/delete-suggestion/:suggestionId', SuggestionController.deleteSuggestion);
-suggestionRouter.post('/add-comment', SuggestionController.addComment);
+suggestionRouter.post('/delete-suggestion/:suggestionId', SuggestionController.deleteSuggestion);//
+suggestionRouter.post('/add-comment', SuggestionController.addComment);//
 
 module.exports = suggestionRouter;
