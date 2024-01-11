@@ -205,6 +205,16 @@ exports.addComment = async (req, res, next) => {
         if (!suggestion) {
             return res.status(500).json({ error: 'Attempt to delete non-existant suggestion' });
         }
+        const tourist = await TouristService.getTouristByEmail(suggestion.email);
+        if (tourist.deviceToken !== '0') {
+            sendNotification(tourist.deviceToken, `Update on your suggestion(${suggestion.name})`, 'Check out the feedback!')
+                .then((response) => {
+                    console.log('Successfully sent message:', response);
+                })
+                .catch((error) => {
+                    console.error('Error sending message:', error);
+                });
+        }
         const updated = await SuggestionService.addComment(suggestionId, adminComment, admin.email);
         if (!updated) {
             return res.status(500).json({ error: 'Failed to add a comment to the suggestion' });
