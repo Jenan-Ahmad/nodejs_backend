@@ -4,7 +4,7 @@ const DestinationService = require("../services/destination_service");
 const PlanService = require("../services/plan_service");
 const admin = require("../config/fb");
 const bucket = admin.storage().bucket();//firebase storage bucket
-const fs = require('fs');
+const fs = require('fs').promises;
 const axios = require('axios');
 const multer = require('multer');
 const uuid = require('uuid-v4');
@@ -13,6 +13,8 @@ const crypto = require('crypto');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const sendNotification = require('../notifications/send_notification');
+const { spawn } = require('child_process');
+
 
 exports.getRecommendedDestinations = async (req, res, next) => {
     console.log("------------------Get Recommended Destinations------------------");
@@ -376,21 +378,48 @@ exports.getComplaints = async (req, res, next) => {
 
 exports.uploadImages = async (req, res, next) => {
     console.log("------------------Upload Images------------------");
+    console.log(req.body);
     try {
         upload.array('images')(req, res, async (err) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: 'Error uploading files' });
+            }
             const token = req.headers.authorization.split(' ')[1];
             const touristData = await TouristService.getEmailFromToken(token);
             const tourist = await TouristService.getTouristByEmail(touristData.email);
             if (!tourist) {
                 return res.status(500).json({ error: 'User does not exist' });
             }
+            console.log(req.body);
+
             const { destinationName, date, keywords } = req.body;
+            console.log(destinationName);
             const destination = await DestinationService.getDestinationByName(destinationName);
             if (!destination) {
                 return res.status(500).json({ error: 'Destination Doesn\'t exist' });
             }
             const imageUrls = [];
             for (const file of req.files) {
+                if (keywords.includes("Cracks")) {
+                    const updatePromise = await new Promise(async (resolve) => {
+                        console.log("1:", file.buffer);
+                        const localPath = path.join(__dirname, '../crack_analysis', 'temp.jpg');
+                        await fs.writeFile(localPath, file.buffer);
+                        const pythonProcess = spawn('python', ['crack_analysis/cracksAnalyzer.py']);
+                        pythonProcess.stdout.on('data', (data) => {
+                            console.log(`Python script output: ${data}`);
+                        });
+                        pythonProcess.stderr.on('data', (data) => {
+                            console.error(`Python script error: ${data}`);
+                        });
+                        pythonProcess.on('close', async (code) => {
+                            console.log(`Python script exited with code ${code}`);
+                            file.buffer = await fs.readFile(localPath);
+                            resolve();
+                        });
+                    });
+                }
                 await new Promise((resolve, reject) => {
                     const metadata = {
                         metadata: {
@@ -830,8 +859,8 @@ async function generateHash(imageUrl) {
 }
 
 function markCommonElements(arr1, arr2) {
-    const markedArray1 = arr1.map((el, index) => ({ image: el, status: arr2.includes(el) ? 'common' : 'not common' }));
-    const markedArray2 = arr2.map((el, index) => ({ image: el, status: arr1.includes(el) ? 'common' : 'not common' }));
+    const markedArray2 = arr1.map((el, index) => ({ image: el, status: arr2.includes(el) ? 'common' : 'not common' }));
+    const markedArray1 = arr2.map((el, index) => ({ image: el, status: arr1.includes(el) ? 'common' : 'not common' }));
 
     return { markedArray1, markedArray2 };
 }
@@ -913,6 +942,10 @@ exports.addDestination = async (req, res, next) => {
                 const originalHash = await Promise.all(totalImages.map(generateHash));
                 const { markedArray2, markedArray1 } = markCommonElements(uploadedHash, originalHash);
                 const finalImages = [];
+                console.log(imageUrls);
+                console.log(markedArray2);
+                console.log(totalImages);
+                console.log(markedArray1);
                 if (markedArray1[0].status === 'common') {
                     finalImages.push(existDestination.images.mainImage);
                 }
@@ -936,6 +969,7 @@ exports.addDestination = async (req, res, next) => {
                         }
                     } else {
                         finalImages.push(imageUrls[i]);
+                        console.log("image added from new: ", imageUrls[i]);
                     }
                 }
                 const destination = await AdminService.editDestination(
