@@ -7,6 +7,7 @@ const multer = require('multer');
 const uuid = require('uuid-v4');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const sendNotification = require('../notifications/send_notification');
 
 exports.storeDestination = async (req, res, next) => {
     console.log("------------------Store Destination------------------");

@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 const express = require('express');
-const { isNull } = require("lodash");
+const { isNull, result } = require("lodash");
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -368,47 +368,45 @@ class DestinationService {
 
   static async searchDestinations(searchTerm, isBudgetFriendly, isMidRange, isLuxurious, sheltered) {
     try {
-      const searchTerms = searchTerm.split(' ');
       const cities = ['ramallah', 'nablus', 'jerusalem', 'bethlehem'];
-      const regexSearchTerms = searchTerm.split(' ').map(term => new RegExp(term, 'i'));
-
+      const regexSearchTerms = searchTerm.split(' ').map(term => new RegExp(`\\b${term}\\b`, 'i'));
+      const cityRegexArray = regexSearchTerms.filter(term =>
+        cities.some(city => term.source.includes(city.toLowerCase()))
+      );
+      const nonCityTermsArray = regexSearchTerms.filter(term =>
+        !cities.some(city => term.source.includes(city.toLowerCase()))
+      );
+      const combinedNonCityRegex = new RegExp(nonCityTermsArray.map(term => term.source).join('|'), 'i');
       let query = {
         $or: [
-          { 'location.address': { $in: regexSearchTerms } },
-          { 'name': { $in: regexSearchTerms } },
-          { 'category': { $in: regexSearchTerms } },
-          { 'geotags': { $in: regexSearchTerms } },
+          { 'name': { $in: combinedNonCityRegex } },
+          { 'category': { $in: combinedNonCityRegex } },
+          { 'geotags': { $in: combinedNonCityRegex } },
         ],
       };
-
       if (cities.some(city => searchTerm.toLowerCase().includes(city.toLowerCase()))) {
         query['$and'] = [
-          { 'location.address': { $in: regexSearchTerms } },
-          {
-            $or: [
-              { 'name': { $in: regexSearchTerms } },
-              { 'category': { $in: regexSearchTerms } },
-              { 'geotags': { $in: regexSearchTerms } },
-            ]
-          },
+          { 'location.address': { $in: cityRegexArray } },
         ];
       }
       const budgetOptions = [];
       if (isBudgetFriendly === "true") budgetOptions.push('budgetfriendly');
       if (isMidRange === "true") budgetOptions.push('midrange');
       if (isLuxurious === "true") budgetOptions.push('luxurious');
-
       if (budgetOptions.length > 0) {
         query['budget'] = { $in: budgetOptions };
       }
-
       if (sheltered === "true") {
         query.sheltered = sheltered;
       }
-
       console.log('Constructed Query:', JSON.stringify(query));
-      const results = await DestinationModel.find(query);
+      let results = await DestinationModel.find(query);
       console.log(results);
+      if (results.length == 0 && cities.some(city => searchTerm.toLowerCase().includes(city.toLowerCase()))) {
+        query = { 'location.address': { $in: cityRegexArray } };
+        results = await DestinationModel.find(query);
+        console.log(results);
+      }
       return results;
     } catch (error) {
       console.error(error);

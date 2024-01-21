@@ -58,4 +58,17 @@ exports.getAdminsData = async (req, res, next) => {
         return res.status(500).json({ error: "Failed to get admins data" });
     }
 };
-
+exports.temp = async (req, res, next) => {
+    const filePath = 'https://firebasestorage.googleapis.com/v0/b/touristine-9a51a.appspot.com/o/destinations_images%2Falaqsadesc3.jpg?alt=media&token=aa4f44bc-45b7-49f1-8992-09d5a9f2b3f0'; // Replace with the actual file path
+    fs.readFile(filePath, (err, data) => {
+        if (err) {
+          console.error('Error reading file:', err);
+          res.status(500).send('Internal Server Error');
+          return;
+        }
+    
+        res.setHeader('Content-Type', 'image/png');
+        res.setHeader('Content-Disposition', 'attachment; filename=file.png');
+        res.end(data); // Use res.end instead of res.send for binary data
+      });
+};
