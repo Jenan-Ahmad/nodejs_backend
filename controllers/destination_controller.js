@@ -143,7 +143,7 @@ exports.getDestinationDetails = async (req, res, next) => {
             About: destination.description, Category: destination.category,
             OpeningTime: destination.workingHours.openingTime, ClosingTime: destination.workingHours.closingTime,
             WorkingDays: destination.workingHours.workingdays, Weather: temperature, WeatherDescription: weatherDescription,
-            Rating: FRating, CostLevel: destination.budget, sheltered: destination.sheltered, virtualTourLink: virtualTourLink,
+            Rating: FRating, CostLevel: destination.budget, sheltered: destination.sheltered, virtualTourLink: destination.virtualTourLink,
             EstimatedTime: destination.estimatedDuration.displayedDuration, Services: Services
         };
         const rating = { oneStar: oneStar, twoStars: twoStars, threeStars: threeStars, fourStars: fourStars, fiveStars: fiveStars };
@@ -1434,7 +1434,7 @@ exports.getDestinationInfo = async (req, res, next) => {
             destID: destination._id, imagesURLs: [destination.images.mainImage, ...destination.images.descriptiveImages],
             destinationName: destination.name, city: destination.location.address, category: destination.category,
             budget: destination.budget, timeToSpend: destination.estimatedDuration.displayedDuration,
-            sheltered: destination.sheltered, virtualTourLink: virtualTourLink, about: destination.description,
+            sheltered: destination.sheltered, virtualTourLink: destination.virtualTourLink, about: destination.description,
             latitude: destination.location.latitude, longitude: destination.location.longitude,
             openingTime: destination.workingHours.openingTime, closingTime: destination.workingHours.closingTime,
             selectedWorkingDays: destination.workingHours.workingdays, visitorTypes: destination.visitorsType,
