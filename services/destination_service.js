@@ -609,7 +609,14 @@ class DestinationService {
 
   static async getDestinationsWithCracks() {
     try {
-      return await DestinationModel.find({ 'images.pendingImages.status': 'Pending', 'images.pendingImages.keywords': 'Cracks' });
+      return await DestinationModel.find({
+        'images.pendingImages': {
+          $elemMatch: {
+            status: 'Pending',
+            keywords: 'Cracks'
+          }
+        }
+      });
     } catch (err) {
       console.log(err);
       throw new Error('An error occurred while retrieving the destination by city');

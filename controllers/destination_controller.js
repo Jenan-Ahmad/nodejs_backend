@@ -1339,7 +1339,7 @@ exports.getDestinationsWithCracks = async (req, res, next) => {
         const destinationsList = await DestinationService.getDestinationsWithCracks();
         const destinations = await Promise.all(destinationsList.map(async (destination) => {
             const crackImagesCount = destination.images.pendingImages
-                .filter(image => image.keywords.includes('Cracks') && image.status === 'Pending')
+                .filter(image => (image.keywords.includes('Cracks') && image.status === 'Pending'))
                 .length;
             return {
                 id: destination._id,
