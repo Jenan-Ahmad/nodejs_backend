@@ -32,6 +32,11 @@ destinationRouter.post('/reject-an-upload', DestinationController.rejectAnUpload
 destinationRouter.post('/get-added-destinations', DestinationController.getAddedDestinations);
 destinationRouter.post('/delete-added-destination/:destinationId', DestinationController.deleteAddedDestination);
 destinationRouter.post('/get-destination-info', DestinationController.getDestinationInfo);
+destinationRouter.post('/get-destinations-with-cracks', DestinationController.getDestinationsWithCracks);
+destinationRouter.post('/delete-destinations-with-cracks', DestinationController.deleteDestinationsWithCracks);
+destinationRouter.post('/get-destination-cracks', DestinationController.getDestinationCracks);
+destinationRouter.post('/reject-uploaded-crack', DestinationController.rejectUploadedCrack);
+
 
 destinationRouter.post('/get-weather', DestinationController.getWeather);
 module.exports = destinationRouter;

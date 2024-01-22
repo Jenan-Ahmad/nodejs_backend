@@ -249,7 +249,6 @@ class DestinationService {
           points += 10;
         }
       }
-
       console.log("services---------------");
       destination.services?.forEach(service => {
         switch (service.name.toLowerCase()) {
@@ -538,16 +537,39 @@ class DestinationService {
   static async rejectAllPendingImages(destinationName) {
     try {
       return await DestinationModel.updateOne(
-        { name: destinationName },
+        {
+          name: destinationName,
+          'images.pendingImages': { $elemMatch: { keywords: { $in: ['General', 'Services'], $ne: 'Cracks' }, status: 'Pending' } }
+        },
         {
           $set: {
-            'images.pendingImages.$[].status': 'Rejected',
+            'images.pendingImages.$[elem].status': 'Rejected',
           },
-        }
+        },
+        { arrayFilters: [{ 'elem.keywords': { $in: ['General', 'Services'], $ne: 'Cracks' }, 'elem.status': 'Pending' }] }
       );
     } catch (err) {
       console.log(err);
-      throw new Error('An error occurred while updating the destinations');
+      throw new Error('An error occurred while rejecting images');
+    }
+  }
+  static async rejectAllPendingImagesCracks(destinationName) {
+    try {
+      return await DestinationModel.updateOne(
+        {
+          name: destinationName,
+          'images.pendingImages': { $elemMatch: { keywords: { $in: ['Cracks'], $ne: ['General', 'Services'] }, status: 'Pending' } }
+        },
+        {
+          $set: {
+            'images.pendingImages.$[elem].status': 'Rejected',
+          },
+        },
+        { arrayFilters: [{ 'elem.keywords': { $in: ['Cracks'], $ne: ['General', 'Services'] }, 'elem.status': 'Pending' }] }
+      );
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while rejecting images');
     }
   }
 
@@ -582,6 +604,15 @@ class DestinationService {
     } catch (err) {
       console.log(err);
       throw new Error('An error occurred while deleting the destination');
+    }
+  }
+
+  static async getDestinationsWithCracks() {
+    try {
+      return await DestinationModel.find({ 'images.pendingImages.status': 'Pending', 'images.pendingImages.keywords': 'Cracks' });
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while retrieving the destination by city');
     }
   }
 

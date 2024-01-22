@@ -674,7 +674,7 @@ class AdminService {
         name, description, activityList, longitude,
         latitude, address, category, services, geotags,
         contact, budget, workingHours, displayedDuration,
-        visitorsType, ageCategory, sheltered, mainImage, descriptiveImages, date, addedBy
+        visitorsType, ageCategory, sheltered, virtualTourLink, mainImage, descriptiveImages, date, addedBy
     ) {
         try {
             const location = { longitude, latitude, address }
@@ -683,7 +683,7 @@ class AdminService {
             const destination = new DestinationModel({
                 name, description, activityList, location, category, services, geotags,
                 contact, budget, workingHours, estimatedDuration,
-                visitorsType, ageCategory, sheltered, date, addedBy, images
+                visitorsType, ageCategory, sheltered, virtualTourLink, date, addedBy, images
             });
             return await destination.save();
         } catch (error) {
@@ -697,7 +697,7 @@ class AdminService {
         name, description, activityList, longitude,
         latitude, address, category, services, geotags,
         contact, budget, workingHours, displayedDuration,
-        visitorsType, ageCategory, sheltered, mainImage, descriptiveImages, date, addedBy
+        visitorsType, ageCategory, sheltered, virtualTourLink, mainImage, descriptiveImages, date, addedBy
     ) {
         try {
             const location = { longitude, latitude, address }
@@ -709,7 +709,7 @@ class AdminService {
                         description: description, activityList: activityList, location: location,
                         category: category, services: services, geotags: geotags, contact: contact,
                         budget: budget, workingHours: workingHours, estimatedDuration: estimatedDuration,
-                        visitorsType: visitorsType, ageCategory: ageCategory, sheltered: sheltered,
+                        visitorsType: visitorsType, ageCategory: ageCategory, sheltered: sheltered, virtualTourLink: virtualTourLink,
                         'images.mainImage': mainImage, 'images.descriptiveImages': descriptiveImages, date: date,
                         addedBy: addedBy
                     },

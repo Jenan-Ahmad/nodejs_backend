@@ -209,6 +209,9 @@ const destinationSchema = new mongoose.Schema({
     date: {
         type: String,
     },
+    virtualTourLink: {
+        type: String,
+    },
 });
 
 const DestinationModel = db.model("destinations", destinationSchema);

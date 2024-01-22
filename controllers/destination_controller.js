@@ -143,7 +143,7 @@ exports.getDestinationDetails = async (req, res, next) => {
             About: destination.description, Category: destination.category,
             OpeningTime: destination.workingHours.openingTime, ClosingTime: destination.workingHours.closingTime,
             WorkingDays: destination.workingHours.workingdays, Weather: temperature, WeatherDescription: weatherDescription,
-            Rating: FRating, CostLevel: destination.budget, sheltered: destination.sheltered,
+            Rating: FRating, CostLevel: destination.budget, sheltered: destination.sheltered, virtualTourLink: virtualTourLink,
             EstimatedTime: destination.estimatedDuration.displayedDuration, Services: Services
         };
         const rating = { oneStar: oneStar, twoStars: twoStars, threeStars: threeStars, fourStars: fourStars, fiveStars: fiveStars };
@@ -886,7 +886,7 @@ exports.addDestination = async (req, res, next) => {
             const { about, activities, longitude,
                 latitude, city, category, services, otherServices, geoTags,
                 contact, budget, openingTime, closingTime, workingDays
-                , timeToSpend, visitorTypes, ageCategories, sheltered, date } = req.body;
+                , timeToSpend, visitorTypes, ageCategories, sheltered, date, virtualTourLink } = req.body;
             if (!req.files || req.files.length === 0) {
                 console.log("no image");
                 return res.status(500).json({ message: "The destination was not added" });
@@ -976,14 +976,14 @@ exports.addDestination = async (req, res, next) => {
                     destinationName, about, activityList, longitude,
                     latitude, city, category, servicesObjects, geotagsList,
                     contact, budget, workingHours, displayedDuration,
-                    visitorTypesList, ageCategoriesList, sheltered, finalImages[0], finalImages.slice(1), date, admin.email
+                    visitorTypesList, ageCategoriesList, sheltered, virtualTourLink, finalImages[0], finalImages.slice(1), date, admin.email
                 )
             } else {
                 const destination = await AdminService.addDestination(
                     destinationName, about, activityList, longitude,
                     latitude, city, category, servicesObjects, geotagsList,
                     contact, budget, workingHours, displayedDuration,
-                    visitorTypesList, ageCategoriesList, sheltered, imageUrls[0], imageUrls.slice(1), date, admin.email
+                    visitorTypesList, ageCategoriesList, sheltered, virtualTourLink, imageUrls[0], imageUrls.slice(1), date, admin.email
                 )
             }
             return res.status(200).json({ message: "Destination added successfully" });
@@ -1191,7 +1191,7 @@ exports.getDestinationUploads = async (req, res, next) => {
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
-        const filteredUploads = destination.images.pendingImages.filter(pendingImages => pendingImages.status.toLocaleLowerCase() === 'pending');
+        const filteredUploads = destination.images.pendingImages.filter(pendingImages => (pendingImages.status.toLocaleLowerCase() === 'pending' && !pendingImages.keywords.includes('Cracks')));
         const uploadedImages = await Promise.all(filteredUploads.map(async (pendingImages) => {
             return {
                 id: pendingImages._id,
@@ -1265,7 +1265,7 @@ exports.rejectAllUplaods = async (req, res, next) => {
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
-        const unseenImages = destination.images.pendingImages.filter(image => image.status.toLocaleLowerCase() === 'pending');
+        const unseenImages = destination.images.pendingImages.filter(image => (image.status.toLocaleLowerCase() === 'pending' && !image.keywords.includes('Cracks')));
         for (const image of unseenImages) {
             const tourist = await TouristService.getTouristByEmail(image.email);
             if (tourist.deviceToken !== '0') {
@@ -1307,7 +1307,7 @@ exports.rejectAnUpload = async (req, res, next) => {
         const upload = destination.images.pendingImages.find(p => p._id.equals(uploadId));
         const tourist = await TouristService.getTouristByEmail(upload.email);
         if (tourist.deviceToken !== '0') {
-            sendNotification(tourist.deviceToken, 'Update on your complaint', 'Your complaint has been seen by the admins')
+            sendNotification(tourist.deviceToken, 'Update on your uploaded images', 'Your images were rejected\nGive it another shot!')
                 .then((response) => {
                     console.log('Successfully sent message:', response);
                 })
@@ -1324,6 +1324,34 @@ exports.rejectAnUpload = async (req, res, next) => {
     catch (error) {
         console.log(error);
         return res.status(500).json({ error: 'Failed to reject the uploaded image' });
+    }
+};
+
+exports.getDestinationsWithCracks = async (req, res, next) => {
+    console.log("------------------Reject An Upload------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const destinationsList = await DestinationService.getDestinationsWithCracks();
+        const destinations = await Promise.all(destinationsList.map(async (destination) => {
+            const crackImagesCount = destination.images.pendingImages
+                .filter(image => image.keywords.includes('Cracks') && image.status === 'Pending')
+                .length;
+            return {
+                id: destination._id,
+                name: destination.name,
+                image: destination.images.mainImage,
+                numberOfUploads: crackImagesCount,
+            };
+        }));
+        return res.status(200).json({ destinations: destinations });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to retrieve destinations with crack images' });
     }
 };
 
@@ -1406,7 +1434,7 @@ exports.getDestinationInfo = async (req, res, next) => {
             destID: destination._id, imagesURLs: [destination.images.mainImage, ...destination.images.descriptiveImages],
             destinationName: destination.name, city: destination.location.address, category: destination.category,
             budget: destination.budget, timeToSpend: destination.estimatedDuration.displayedDuration,
-            sheltered: destination.sheltered, about: destination.description,
+            sheltered: destination.sheltered, virtualTourLink: virtualTourLink, about: destination.description,
             latitude: destination.location.latitude, longitude: destination.location.longitude,
             openingTime: destination.workingHours.openingTime, closingTime: destination.workingHours.closingTime,
             selectedWorkingDays: destination.workingHours.workingdays, visitorTypes: destination.visitorsType,
@@ -1418,6 +1446,114 @@ exports.getDestinationInfo = async (req, res, next) => {
     catch (error) {
         console.log(error);
         return res.status(500).json({ error: 'Failed to get the destination\'s info' });
+    }
+};
+
+exports.deleteDestinationsWithCracks = async (req, res, next) => {
+    console.log("------------------Reject All Crack Uploads------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationId } = req.body;
+        const destination = await DestinationService.getDestinationById(destinationId);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const unseenImages = destination.images.pendingImages.filter(image => (image.status.toLocaleLowerCase() === 'pending' && image.keywords.includes('Cracks')));
+        for (const image of unseenImages) {
+            const tourist = await TouristService.getTouristByEmail(image.email);
+            if (tourist.deviceToken !== '0') {
+                sendNotification(tourist.deviceToken, 'Update on your uploaded crack images', 'Your images were rejected\nGive it another shot!')
+                    .then((response) => {
+                        console.log('Successfully sent message:', response);
+                    })
+                    .catch((error) => {
+                        console.error('Error sending message:', error);
+                    });
+            }
+        }
+        const update = await DestinationService.rejectAllPendingImagesCracks(destination.name);
+        if (!update) {
+            return res.status(500).json({ error: 'Rejection Failed' });
+        }
+        return res.status(200).json({ message: "Images were rejected" });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to reject the uploaded image' });
+    }
+};
+
+exports.getDestinationCracks = async (req, res, next) => {
+    console.log("------------------Get Destination Cracks------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationId } = req.body;
+        const destination = await DestinationService.getDestinationById(destinationId);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const filteredUploads = destination.images.pendingImages.filter(pendingImages => (pendingImages.status.toLocaleLowerCase() === 'pending' && pendingImages.keywords.includes('Cracks')));
+        const uploadedImages = await Promise.all(filteredUploads.map(async (pendingImages) => {
+            return {
+                id: pendingImages._id,
+                keywords: pendingImages.keywords,
+                date: pendingImages.date,
+                images: pendingImages.images,
+                status: pendingImages.status,
+            };
+        }));
+        return res.status(200).json({ uploadedImages: uploadedImages });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to retrieve uploads' });
+    }
+};
+
+exports.rejectUploadedCrack = async (req, res, next) => {
+    console.log("------------------Reject a Crack Upload------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationName, uploadId } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const upload = destination.images.pendingImages.find(p => p._id.equals(uploadId));
+        const tourist = await TouristService.getTouristByEmail(upload.email);
+        if (tourist.deviceToken !== '0') {
+            sendNotification(tourist.deviceToken, 'Update on your uploaded crack images', 'Your images were rejected\nGive it another shot!')
+                .then((response) => {
+                    console.log('Successfully sent message:', response);
+                })
+                .catch((error) => {
+                    console.error('Error sending message:', error);
+                });
+        }
+        const update = await DestinationService.rejectPendingImages(destinationName, uploadId);
+        if (!update) {
+            return res.status(500).json({ error: 'Rejection Failed' });
+        }
+        return res.status(200).json({ message: "Images were rejected" });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to reject the uploaded image' });
     }
 };
 
