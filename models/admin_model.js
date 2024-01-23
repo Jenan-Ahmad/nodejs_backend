@@ -38,6 +38,9 @@ const adminSchema = new mongoose.Schema({
     deviceToken: {
         type: String,
     },
+    city: {
+        type: String,
+    },
 });
 
 // Middleware to hash the password before saving it

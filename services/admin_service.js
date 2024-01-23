@@ -39,7 +39,7 @@ class AdminService {
 
     static async getAdminsData() {
         try {
-            return await AdminModel.find({});
+            return await AdminModel.find({ email: { $ne: 'touristineapp@gmail.com' } });
         } catch (err) {
             console.log(err);
             throw new Error('An error occurred while retrieving the admins.');
@@ -722,11 +722,11 @@ class AdminService {
 
     }
 
-    static async addAdmin(firstName, lastName, email, password) {
+    static async addAdmin(firstName, lastName, email, password, city) {
         try {
             const newAdmin = 'true';
             const profileImage = "";
-            const createAdmin = new AdminModel({ firstName, lastName, email, password, newAdmin, profileImage });
+            const createAdmin = new AdminModel({ firstName, lastName, email, password, newAdmin, profileImage, city });
             await createAdmin.save();
             return true;
         } catch (error) {
@@ -735,13 +735,13 @@ class AdminService {
         }
     }
 
-    static async addAdminEmail(firstName, lastName, email, password) {
+    static async addAdminEmail(firstName, lastName, email, password, city) {
         try {
             const mailOptions = {
                 from: 'touristineapp@gmail.com',
                 to: email,
                 subject: 'Admin Account Information',
-                text: `Dear ${firstName} ${lastName},\n\nYou can log into your acccount using the following information:\nUsername: ${email}\nPassword: ${password}\n\nBest regards`,
+                text: `Dear ${firstName} ${lastName},\n\nYou can log into your acccount using the following information:\nUsername: ${email}\nPassword: ${password}\n\nYou are responsible for ${city}\n\nBest regards`,
 
             };
             transporter.sendMail(mailOptions, (error, info) => {

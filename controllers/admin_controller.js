@@ -18,16 +18,16 @@ exports.addNewAdmin = async (req, res, next) => {
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
-        const { firstName, lastName, email, password } = req.body;
+        const { firstName, lastName, email, password, city } = req.body;
         const isAdmin = await AdminService.getAdminByEmail(email);
         if (isAdmin) {
             return res.status(500).json({ error: 'Email is already used' });
         }
-        const addAdmin = await AdminService.addAdmin(firstName, lastName, email, password);
+        const addAdmin = await AdminService.addAdmin(firstName, lastName, email, password, city);
         if (!addAdmin) {
             return res.status(500).json({ error: 'Couldn\'t add a new admin' });
         }
-        const addAdminEmail = await AdminService.addAdminEmail(firstName, lastName, email, password);
+        const addAdminEmail = await AdminService.addAdminEmail(firstName, lastName, email, password, city);
         return res.status(200).json({ message: 'Admin was added successfully' });
     } catch (error) {
         console.error(error);
@@ -50,25 +50,12 @@ exports.getAdminsData = async (req, res, next) => {
             firstName: admin.firstName,
             lastName: admin.lastName,
             email: admin.email,
-            image: admin.profileImage
+            image: admin.profileImage,
+            city: admin.city,
         }));
         return res.status(200).json({ admins: admins });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Failed to get admins data" });
     }
-};
-exports.temp = async (req, res, next) => {
-    const filePath = 'https://firebasestorage.googleapis.com/v0/b/touristine-9a51a.appspot.com/o/destinations_images%2Falaqsadesc3.jpg?alt=media&token=aa4f44bc-45b7-49f1-8992-09d5a9f2b3f0'; // Replace with the actual file path
-    fs.readFile(filePath, (err, data) => {
-        if (err) {
-          console.error('Error reading file:', err);
-          res.status(500).send('Internal Server Error');
-          return;
-        }
-    
-        res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Content-Disposition', 'attachment; filename=file.png');
-        res.end(data); // Use res.end instead of res.send for binary data
-      });
 };

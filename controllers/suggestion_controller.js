@@ -139,7 +139,7 @@ exports.getSuggestions = async (req, res, next) => {
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
-        const suggestionsList = await SuggestionService.getAllSuggestions();
+        const suggestionsList = await SuggestionService.getAllSuggestions(admin.city);
         const suggestions = await Promise.all(suggestionsList.map(async (suggestion) => {
             const tourist = await TouristService.getTouristByEmail(suggestion.email);
             return {

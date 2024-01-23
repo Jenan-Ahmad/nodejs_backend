@@ -589,9 +589,9 @@ class DestinationService {
     }
   }
 
-  static async getDestinationsInCategory(category) {
+  static async getDestinationsInCategory(category, city) {
     try {
-      return await DestinationModel.find({ category: { $regex: new RegExp(category, 'i') } });
+      return await DestinationModel.find({ category: { $regex: new RegExp(category, 'i') }, 'location.address': { $regex: new RegExp(city, 'i') } });
     } catch (err) {
       console.log(err);
       throw new Error('An error occurred while retrieving the destination by category');
@@ -607,9 +607,10 @@ class DestinationService {
     }
   }
 
-  static async getDestinationsWithCracks() {
+  static async getDestinationsWithCracks(city) {
     try {
       return await DestinationModel.find({
+        'location.address': { $regex: new RegExp(city, 'i') },
         'images.pendingImages': {
           $elemMatch: {
             status: 'Pending',

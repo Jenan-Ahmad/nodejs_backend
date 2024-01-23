@@ -15,7 +15,6 @@ const upload = multer({ storage: storage });
 const sendNotification = require('../notifications/send_notification');
 const { spawn } = require('child_process');
 
-
 exports.getRecommendedDestinations = async (req, res, next) => {
     console.log("------------------Get Recommended Destinations------------------");
     try {
@@ -1007,7 +1006,7 @@ exports.getDestinations = async (req, res, next) => {
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
-        const allDestinations = await DestinationService.getDestinations();
+        const allDestinations = await DestinationService.getDestinationsInCity(admin.city);
         const destinations = [];
         for (const destination of allDestinations) {
             const transformedItem = {
@@ -1336,7 +1335,7 @@ exports.getDestinationsWithCracks = async (req, res, next) => {
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
-        const destinationsList = await DestinationService.getDestinationsWithCracks();
+        const destinationsList = await DestinationService.getDestinationsWithCracks(admin.city);
         const destinations = await Promise.all(destinationsList.map(async (destination) => {
             const crackImagesCount = destination.images.pendingImages
                 .filter(image => (image.keywords.includes('Cracks') && image.status === 'Pending'))
@@ -1367,11 +1366,9 @@ exports.getAddedDestinations = async (req, res, next) => {
         const { filter } = req.body;
         let destinations;
         if (filter === 'all') {
-            destinations = await DestinationService.getDestinations();
-        } else if (filter.match(/^(ramallah|nablus|jerusalem|bethlehem)$/i)) {
-            destinations = await DestinationService.getDestinationsInCity(filter);
+            destinations = await DestinationService.getDestinationsInCity(admin.city);
         } else {//category
-            destinations = await DestinationService.getDestinationsInCategory(filter);
+            destinations = await DestinationService.getDestinationsInCategory(filter, admin.city);
         }
         const destinationsList = await Promise.all(destinations.map(async (destination) => {
             return {

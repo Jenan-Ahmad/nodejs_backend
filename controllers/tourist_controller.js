@@ -110,7 +110,11 @@ exports.login = async (req, res, next) => {
         }
       }
       const token = await TouristService.generateAccessToken(tokenData, "secret", "1d");
-      return res.status(200).json({ status: true, success: "sendData", token: token, firstName: admin.firstName, lastName: admin.lastName, password: password, profileImage: admin.profileImage, newAdmin: isNewAdmin, type: 200 });//type 200->admin
+      let type = 200;
+      if (admin.email === 'touristineapp@gmail.com') {
+        type = 300;
+      }
+      return res.status(200).json({ status: true, success: "sendData", token: token, firstName: admin.firstName, lastName: admin.lastName, password: password, profileImage: admin.profileImage, newAdmin: isNewAdmin, type: 300, city: admin.city });//type 200->admin
     } else {//if tourist
       const isPasswordCorrect = await tourist.comparePassword(password);
       if (isPasswordCorrect == false) {
@@ -147,7 +151,7 @@ exports.loginGGL = async (req, res, next) => {
     const tourist = await TouristService.getTouristByEmail(email);
     if (!tourist) {
       //create new tourist return flag to front
-      const response = await TouristService.registerTourist(token, firstName, lastName, email, password);
+      const response = await TouristService.registerTourist(token, firstName, lastName, email, password, '0');
       const updatedUser = await TouristService.updateProfile(firstName, lastName, email, password, photoURL);
       if (!updatedUser) {
         throw new Error('Log In with Google Failed');

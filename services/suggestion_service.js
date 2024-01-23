@@ -53,9 +53,9 @@ class SuggestionService {
         }
     }
 
-    static async getAllSuggestions() {
+    static async getAllSuggestions(city) {
         try {
-            return await SuggestionModel.find({ status: { $regex: /^unseen$/i } });
+            return await SuggestionModel.find({ status: { $regex: /^unseen$/i }, city: { $regex: new RegExp(city, 'i') } });
         } catch (err) {
             console.log(err);
             throw new Error('An error occurred while retrieving the suggestions');
