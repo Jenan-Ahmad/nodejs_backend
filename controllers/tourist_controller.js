@@ -388,6 +388,13 @@ exports.getTouristsInfo = async (req, res, next) => {
     }
     const { touristsEmails } = req.body;
     const touristsEmailsList = JSON.parse(touristsEmails);
+    const mainAdmin = await AdminService.getAdminByEmail('touristineapp@gmail.com');
+    const mainAdminInfo = {
+      firstName: mainAdmin.firstName,
+      lastName: mainAdmin.lastName,
+      email: mainAdmin.email,
+      image: mainAdmin.profileImage
+    };
     const touristsList = await TouristService.getTouristsData(touristsEmailsList);
     const tourists = touristsList.map(tourist => ({
       firstName: tourist.firstName,
@@ -395,7 +402,7 @@ exports.getTouristsInfo = async (req, res, next) => {
       email: tourist.email,
       image: tourist.profileImage
     }));
-    return res.status(200).json({ tourists: tourists });
+    return res.status(200).json({ tourists: [mainAdminInfo, ...tourists] });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Failed to get tourists data" });
