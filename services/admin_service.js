@@ -46,6 +46,15 @@ class AdminService {
         }
     }
 
+    static async deleteAdmin(adminEmail){
+        try {
+            return await AdminModel.deleteOne({ email: adminEmail });
+        } catch (err) {
+            console.log(err);
+            throw new Error('An error occurred while deleting the admin');
+        }
+    }
+
     static async getVisitsByCity() {
         try {
             const result = await DestinationModel.aggregate([

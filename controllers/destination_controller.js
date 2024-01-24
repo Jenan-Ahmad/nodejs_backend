@@ -1365,10 +1365,20 @@ exports.getAddedDestinations = async (req, res, next) => {
         }
         const { filter } = req.body;
         let destinations;
-        if (filter === 'all') {
-            destinations = await DestinationService.getDestinationsInCity(admin.city);
-        } else {//category
-            destinations = await DestinationService.getDestinationsInCategory(filter, admin.city);
+        if (admin.email === "touristineapp@gmail.com") {
+            if (filter === 'all') {
+                destinations = await DestinationService.getDestinations();
+            } else if (filter.match(/^(ramallah|nablus|jerusalem|bethlehem)$/i)) {
+                destinations = await DestinationService.getDestinationsInCity(filter);
+            } else {//category
+                destinations = await DestinationService.getDestinationsInCategory(filter);
+            }
+        } else {
+            if (filter === 'all') {
+                destinations = await DestinationService.getDestinationsInCity(admin.city);
+            } else {//category
+                destinations = await DestinationService.getDestinationsInCategoryInCity(filter, admin.city);
+            }
         }
         const destinationsList = await Promise.all(destinations.map(async (destination) => {
             return {

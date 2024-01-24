@@ -43,7 +43,12 @@ exports.getAdminsData = async (req, res, next) => {
         const touristData = await TouristService.getEmailFromToken(token);
         const tourist = await TouristService.getTouristByEmail(touristData.email);
         if (!tourist) {
-            return res.status(500).json({ error: 'User does not exist' });
+            // return res.status(500).json({ error: 'User does not exist' });
+            const adminData = await AdminService.getEmailFromToken(token);
+            const admin = await AdminService.getAdminByEmail(adminData.email);
+            if (!admin) {
+                return res.status(500).json({ error: 'User does not exist' });
+            }
         }
         const adminsList = await AdminService.getAdminsData();
         const admins = adminsList.map(admin => ({
@@ -57,5 +62,30 @@ exports.getAdminsData = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Failed to get admins data" });
+    }
+};
+
+exports.deleteAdmin = async (req, res, next) => {
+    console.log("------------------Get Suggestions------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const adminEmail = req.params.adminEmail;
+        const user = await AdminService.getAdminByEmail(adminEmail);
+        if (!user) {
+            return res.status(500).json({ error: 'Attempt to delete non-existant admin' });
+        }
+        const deleted = await AdminService.deleteAdmin(adminEmail);
+        if (!deleted) {
+            return res.status(404).json({ error: 'Admin was not found' });
+        }
+        return res.status(200).json({ message: "The admin was deleted" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Failed to delete the admin" });
     }
 };

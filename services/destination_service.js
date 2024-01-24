@@ -598,6 +598,15 @@ class DestinationService {
     }
   }
 
+  static async getDestinationsInCategoryInCity(category, city) {
+    try {
+      return await DestinationModel.find({ category: { $regex: new RegExp(category, 'i') }, 'location.address': { $regex: new RegExp(city, 'i') } });
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error occurred while retrieving the destination by category');
+    }
+  }
+
   static async deleteDestinationById(destinationId) {
     try {
       return await DestinationModel.deleteOne({ _id: destinationId });

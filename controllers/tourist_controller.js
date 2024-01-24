@@ -114,7 +114,7 @@ exports.login = async (req, res, next) => {
       if (admin.email === 'touristineapp@gmail.com') {
         type = 300;
       }
-      return res.status(200).json({ status: true, success: "sendData", token: token, firstName: admin.firstName, lastName: admin.lastName, password: password, profileImage: admin.profileImage, newAdmin: isNewAdmin, type: type, city: admin.city });//type 200->admin
+      return res.status(200).json({ status: true, success: "sendData", token: token, firstName: admin.firstName, lastName: admin.lastName, password: password, profileImage: admin.profileImage, newAdmin: isNewAdmin, type: 300, city: admin.city });//type 200->admin
     } else {//if tourist
       const isPasswordCorrect = await tourist.comparePassword(password);
       if (isPasswordCorrect == false) {
@@ -378,7 +378,7 @@ exports.fetchLocation = async (req, res, next) => {
 };
 
 exports.getTouristsInfo = async (req, res, next) => {
-  console.log("------------------Add New Admin------------------");
+  console.log("------------------Get Tourist Info------------------");
   try {
     const token = req.headers.authorization.split(' ')[1];
     const adminData = await AdminService.getEmailFromToken(token);
