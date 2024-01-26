@@ -657,7 +657,13 @@ class DestinationService {
         {
           $group: {
             _id: '$location.address',
-            totalCracks: { $sum: { $size: '$images.cracks' } }
+            totalCracks: {
+              $sum: {
+                $size: {
+                  $ifNull: ['$images.cracks', []]
+                }
+              }
+            }
           }
         },
         {
