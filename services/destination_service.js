@@ -230,24 +230,28 @@ class DestinationService {
         }
       });
       console.log("weather---------------");
-      const weatherWorks = await this.getWeather(destination.location.address);
-      console.log("Here is the weather:------------------", weatherWorks);
-      if (weatherWorks != "undefind + 00") {
-        if ((destination.category?.toLowerCase() != "historicalsites") && (destination.category?.toLowerCase() != "religiouslandmarks")) {
-          const weatherDetails = await this.getWeather(destination.location.address);
-          if (weatherDetails.toLowerCase().includes("rain")) {
-            //check for categories concerned with the weather
-            if (destination.sheltered === "true") {
-              points += 30;
+      try {
+        const weatherWorks = await this.getWeather(destination.location.address);
+        console.log("Here is the weather:------------------", weatherWorks);
+        if (weatherWorks != "undefind + 00") {
+          if ((destination.category?.toLowerCase() != "historicalsites") && (destination.category?.toLowerCase() != "religiouslandmarks")) {
+            const weatherDetails = await this.getWeather(destination.location.address);
+            if (weatherDetails.toLowerCase().includes("rain")) {
+              //check for categories concerned with the weather
+              if (destination.sheltered === "true") {
+                points += 30;
+              } else {
+                points -= 30;
+              }
             } else {
-              points -= 30;
+              points += 10;
             }
           } else {
             points += 10;
           }
-        } else {
-          points += 10;
         }
+      } catch (error) {
+        console.log("An error occurred calculating points for the weather");
       }
       console.log("services---------------");
       destination.services?.forEach(service => {
@@ -345,7 +349,7 @@ class DestinationService {
 
   static async getWeather(location) {
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 10000));
       const response = await axios.get(`https://wttr.in/${location}?format=%C+%t`);
       if (response.data.length === 0) {
         const weatherResult = "undefind + 00";
