@@ -1573,8 +1573,8 @@ exports.approveUploadedCrack = async (req, res, next) => {
         if (!admin) {
             return res.status(500).json({ error: 'User does not exist' });
         }
-        const { destinationName, approvedImages, uploadId } = req.body;
-        const destination = await DestinationService.getDestinationByName(destinationName);
+        const { destinationId, approvedImages, uploadId } = req.body;
+        const destination = await DestinationService.getDestinationById(destinationId);
         if (!destination) {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
