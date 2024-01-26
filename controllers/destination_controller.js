@@ -1579,7 +1579,7 @@ exports.approveUploadedCrack = async (req, res, next) => {
             return res.status(500).json({ error: 'Destination Doesn\'t exist' });
         }
         const approvedImagesList = JSON.parse(approvedImages);
-        const update1 = await DestinationService.uploadCrackImages(destinationName, approvedImagesList);
+        const update1 = await DestinationService.uploadCrackImages(destination.name, approvedImagesList);
         if (!update1) {
             return res.status(500).json({ error: 'Approval Failed' });
         }
@@ -1594,7 +1594,7 @@ exports.approveUploadedCrack = async (req, res, next) => {
                     console.error('Error sending message:', error);
                 });
         }
-        const update2 = await DestinationService.approvePendingImages(destinationName, uploadId);
+        const update2 = await DestinationService.approvePendingImages(destination.name, uploadId);
         if (!update2) {
             return res.status(500).json({ error: 'Approval Failed' });
         }
