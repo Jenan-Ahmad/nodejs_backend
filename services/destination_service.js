@@ -514,7 +514,7 @@ class DestinationService {
         }
       );
     } catch (error) {
-      throw new Error("An error occurred updating your desciptive images");
+      throw new Error("An error occurred updating your descriptive images");
     }
   }
 
@@ -530,7 +530,7 @@ class DestinationService {
       );
     } catch (err) {
       console.log(err);
-      throw new Error('An error occurred while updating the destinations');
+      throw new Error('An error occurred while updating the pending images');
     }
   }
 
@@ -553,6 +553,7 @@ class DestinationService {
       throw new Error('An error occurred while rejecting images');
     }
   }
+
   static async rejectAllPendingImagesCracks(destinationName) {
     try {
       return await DestinationModel.updateOne(
@@ -633,8 +634,68 @@ class DestinationService {
     }
   }
 
+  static async uploadCrackImages(destinationName, approvedImagesList) {
+    try {
+      return await DestinationModel.updateOne(
+        { name: destinationName },
+        {
+          $push: {
+            'images.cracks': {
+              $each: approvedImagesList
+            }
+          }
+        }
+      );
+    } catch (error) {
+      throw new Error("An error occurred updating your crack images");
+    }
+  }
+
+  static async getCracksCounts() {
+    try {
+      return await DestinationModel.aggregate([
+        {
+          $group: {
+            _id: '$location.address',
+            totalCracks: { $sum: { $size: '$images.cracks' } }
+          }
+        },
+        {
+          $project: {
+            city: '$_id',
+            totalCracks: 1,
+            _id: 0
+          }
+        }
+      ]);
+    } catch (error) {
+      console.log(error);
+      throw new Error("An error occurred retrieving cracks count");
+    }
+  }
+
+  static async getCracksInCity(city) {
+    try {
+      return await DestinationModel.aggregate([
+        {
+          $match: {
+            'location.address': { $regex: new RegExp(city, 'i') },
+            'images.cracks': { $exists: true, $ne: null, $not: { $size: 0 } }
+          }
+        },
+        {
+          $project: {
+            destinationName: '$name',
+            images: '$images.cracks',
+          },
+        },
+      ]);
+    } catch (error) {
+      console.log(error);
+      throw new Error("An error occurred retrieving cracks images");
+    }
+  }
+
 }
-
-
 
 module.exports = DestinationService;  

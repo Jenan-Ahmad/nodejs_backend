@@ -46,7 +46,7 @@ class AdminService {
         }
     }
 
-    static async deleteAdmin(adminEmail){
+    static async deleteAdmin(adminEmail) {
         try {
             return await AdminModel.deleteOne({ email: adminEmail });
         } catch (err) {

@@ -1246,7 +1246,7 @@ exports.approveAnUpload = async (req, res, next) => {
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({ error: 'Failed to approve the uploaded image' });
+        return res.status(500).json({ error: 'Failed to approve the uploaded images' });
     }
 };
 
@@ -1561,6 +1561,91 @@ exports.rejectUploadedCrack = async (req, res, next) => {
     catch (error) {
         console.log(error);
         return res.status(500).json({ error: 'Failed to reject the uploaded image' });
+    }
+};
+
+exports.approveUploadedCrack = async (req, res, next) => {
+    console.log("------------------Approve An Uploaded Crack------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { destinationName, approvedImages, uploadId } = req.body;
+        const destination = await DestinationService.getDestinationByName(destinationName);
+        if (!destination) {
+            return res.status(500).json({ error: 'Destination Doesn\'t exist' });
+        }
+        const approvedImagesList = JSON.parse(approvedImages);
+        const update1 = await DestinationService.uploadCrackImages(destinationName, approvedImagesList);
+        if (!update1) {
+            return res.status(500).json({ error: 'Approval Failed' });
+        }
+        const upload = destination.images.pendingImages.find(p => p._id.equals(uploadId));
+        const tourist = await TouristService.getTouristByEmail(upload.email);
+        if (tourist.deviceToken !== '0') {
+            sendNotification(tourist.deviceToken, 'Update on your uploaded Crack images', 'Your images were accepted\nThanks for sharing!')
+                .then((response) => {
+                    console.log('Successfully sent message:', response);
+                })
+                .catch((error) => {
+                    console.error('Error sending message:', error);
+                });
+        }
+        const update2 = await DestinationService.approvePendingImages(destinationName, uploadId);
+        if (!update2) {
+            return res.status(500).json({ error: 'Approval Failed' });
+        }
+        return res.status(200).json({ message: "Images were uploaded" });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to approve the uploaded crack images' });
+    }
+};
+
+exports.getCracksCounts = async (req, res, next) => {
+    console.log("------------------Get Cracks Count------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const cracksCountsList = await DestinationService.getCracksCounts();
+        const cracksCounts = [];
+        for (const item of cracksCountsList) {
+            const transformedItem = {
+                [item.city]: item.totalCracks
+            };
+            cracksCounts.push(transformedItem);
+        }
+        return res.status(200).json({ cracksCounts });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to get cracks count' });
+    }
+};
+exports.getCityCracks = async (req, res, next) => {
+    console.log("------------------Get City Cracks------------------");
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const adminData = await AdminService.getEmailFromToken(token);
+        const admin = await AdminService.getAdminByEmail(adminData.email);
+        if (!admin) {
+            return res.status(500).json({ error: 'User does not exist' });
+        }
+        const { cityName } = req.body;
+        const uploadedImages = await DestinationService.getCracksInCity(cityName);
+        return res.status(200).json({ uploadedImages });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Failed to get cracks count' });
     }
 };
 

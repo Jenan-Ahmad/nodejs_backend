@@ -61,6 +61,11 @@ const destinationSchema = new mongoose.Schema({
                 },
             },
         ],
+        cracks: [
+            {
+                type: String
+            },
+        ],
     },
     category: {
         type: String,

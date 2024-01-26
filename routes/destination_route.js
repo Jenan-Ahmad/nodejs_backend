@@ -36,6 +36,9 @@ destinationRouter.post('/get-destinations-with-cracks', DestinationController.ge
 destinationRouter.post('/delete-destinations-with-cracks', DestinationController.deleteDestinationsWithCracks);
 destinationRouter.post('/get-destination-cracks', DestinationController.getDestinationCracks);
 destinationRouter.post('/reject-uploaded-crack', DestinationController.rejectUploadedCrack);
+destinationRouter.post('/approve-uploaded-crack', DestinationController.approveUploadedCrack);
+destinationRouter.post('/get-cracks-counts', DestinationController.getCracksCounts);
+destinationRouter.post('/get-city-cracks', DestinationController.getCityCracks);
 
 
 destinationRouter.post('/get-weather', DestinationController.getWeather);
