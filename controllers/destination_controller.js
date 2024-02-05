@@ -125,9 +125,9 @@ exports.getDestinationDetails = async (req, res, next) => {
         const destinationImages = destination.images.descriptiveImages.map(image => ({
             image: image,
         }));
-        const weather = await DestinationService.getWeather(destination.location.address);
-        const temperature = weather.match(/\d+/);
-        const weatherDescription = weather.match(/[a-zA-Z]+(?=\s*\+)/);
+        // const weather = await DestinationService.getWeather(destination.location.address);
+        const temperature = '00';// weather.match(/\d+/);
+        const weatherDescription = 'undefined';//weather.match(/[a-zA-Z]+(?=\s*\+)/);
         const oneStar = destination.rating.oneStar;
         const twoStars = destination.rating.twoStars;
         const threeStars = destination.rating.threeStars;
