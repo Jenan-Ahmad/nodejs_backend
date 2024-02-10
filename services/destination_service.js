@@ -349,7 +349,7 @@ class DestinationService {
 
   static async getWeather(location) {
     try {
-      await new Promise(resolve => setTimeout(resolve, 10000));
+      await new Promise(resolve => setTimeout(resolve, 5000));
       const response = await axios.get(`https://wttr.in/${location}?format=%C+%t`);
       if (response.data.length === 0) {
         const weatherResult = "undefind + 00";
